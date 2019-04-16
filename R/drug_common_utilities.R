@@ -4,28 +4,31 @@ pkg.env$con <- NULL
 pkg.env$version <- NULL
 pkg.env$exported_date <- NULL
 
-drug_sub_df <- function(rec, main_node, seconadary_node = NULL, id = "drugbank-id", byValue = FALSE) {
+drug_sub_df <-
+  function(rec,
+           main_node,
+           seconadary_node = NULL,
+           id = "drugbank-id") {
     parent_key <- NULL
     if (!is.null(id)) {
-        parent_key <- xmlValue(rec[id][[1]])
+      parent_key <- xmlValue(rec[id][[1]])
     }
 
-    if (byValue) {
-        df <- map_df(rec[main_node], xmlValue)
+    if (is.null(seconadary_node) &&
+        !is.null(rec[[main_node]])) {
+      df <- xmlToDataFrame(rec[[main_node]], stringsAsFactors = FALSE)
     } else {
-        if (is.null(seconadary_node) && !is.null(rec[[main_node]])) {
-            df <- xmlToDataFrame(rec[[main_node]], stringsAsFactors = FALSE)
-        } else {
-            df <- xmlToDataFrame(rec[[main_node]][[seconadary_node]], stringsAsFactors = FALSE)
-        }
-
+      df <-
+        xmlToDataFrame(rec[[main_node]][[seconadary_node]], stringsAsFactors = FALSE)
     }
+
+
 
     if (nrow(df) > 0 && !is.null(parent_key)) {
-        df$parent_key <- parent_key
+      df$parent_key <- parent_key
     }
     return(df)
-}
+  }
 
 
 
@@ -41,9 +44,9 @@ drug_sub_df <- function(rec, main_node, seconadary_node = NULL, id = "drugbank-i
 #' If \code{\link{get_xml_db_rows}} is called before for any reason, so
 #' no need to call it again.
 #'
-#' @param xml_db_name string, full path for the drug bank xml.
-#' @return nothing but sets the db tree in memory to be used by parser
-#' methods
+#' @param xml_db_name string, full path for the drug bank xml or zip file.
+#' @return TRUE when sets the db tree in memory to be used by parser
+#' methods and FALSE otherwise
 #'
 #' @examples
 #' \donttest{
@@ -52,12 +55,44 @@ drug_sub_df <- function(rec, main_node, seconadary_node = NULL, id = "drugbank-i
 #' }
 #' @export
 get_xml_db_rows <- function(xml_db_name) {
+  ext <- file_ext(xml_db_name)
+  dir_name <- dirname(xml_db_name)
+  if (!ext %in% c("zip", "xml")) {
+    stop("Unsupported file format, Kindly use an XML or zip file.")
+  }
+
+  if (ext == "zip") {
+    tryCatch(
+      {
+        db <- unzip(xml_db_name, list = TRUE)
+        xml_db_name <- paste0(dir_name, "/", db$Name[1])
+        message(xml_db_name)
+      },
+      error = function(e) {
+        stop(e)
+      }
+    )
+  }
+
+  if (file.exists(xml_db_name)) {
     drugbank_db <- xmlParse(xml_db_name)
     top <- xmlRoot(drugbank_db)
     pkg.env$version <- XML::xmlAttrs(top)[["version"]]
     pkg.env$exported_date <- XML::xmlAttrs(top)[["exported-on"]]
     pkg.env$children  <- xmlChildren(top)
     return(TRUE)
+  } else {
+    stop(
+      paste(
+        "Could not find the file:",
+        xml_db_name,
+        ".Please ensure",
+        "that the file name is entered correctly",
+        "and that it exists at the specified location."
+      )
+    )
+    return(FALSE)
+  }
 }
 
 #' Establish connection to given data base

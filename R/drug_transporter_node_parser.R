@@ -78,7 +78,13 @@ get_transporters_polypeptide_go_classifiers_df <- function(rec) {
 #' @export
 parse_drug_transporters_actions <- function(save_table = FALSE) {
   drug_transporters_actions <-
-    map_df(pkg.env$children, ~ get_transporters_actions_df(.x))
+    map_df(pkg.env$children, ~ get_transporters_actions_df(.x)) %>%
+    unique()
+
+  if (nrow(drug_transporters_actions) > 0) {
+    colnames(drug_transporters_actions) <- c("action", "transporter_id")
+  }
+
   if (save_table) {
     save_drug_sub(
       con = pkg.env$con,
@@ -116,7 +122,9 @@ parse_drug_transporters_actions <- function(save_table = FALSE) {
 #' @export
 parse_drug_transporters_articles <- function(save_table = FALSE) {
   drug_transporters_articles <-
-    map_df(pkg.env$children, ~ get_transporters_articles_df(.x))
+    map_df(pkg.env$children, ~ get_transporters_articles_df(.x)) %>%
+    unique()
+
   if (save_table) {
     save_drug_sub(
       con = pkg.env$con,
@@ -155,7 +163,9 @@ parse_drug_transporters_articles <- function(save_table = FALSE) {
 #' @export
 parse_drug_transporters_textbooks <- function(save_table = FALSE) {
   drug_transporters_textbooks <-
-    map_df(pkg.env$children, ~ get_transporters_textbooks_df(.x))
+    map_df(pkg.env$children, ~ get_transporters_textbooks_df(.x)) %>%
+    unique()
+
   if (save_table) {
     save_drug_sub(
       con = pkg.env$con,
@@ -193,7 +203,9 @@ parse_drug_transporters_textbooks <- function(save_table = FALSE) {
 #' @export
 parse_drug_transporters_links <- function(save_table = FALSE) {
   drug_transporters_links <-
-    map_df(pkg.env$children, ~ get_transporters_links_df(.x))
+    map_df(pkg.env$children, ~ get_transporters_links_df(.x)) %>%
+    unique()
+
   if (save_table) {
     save_drug_sub(
       con = pkg.env$con,
@@ -235,7 +247,9 @@ parse_drug_transporters_links <- function(save_table = FALSE) {
 parse_drug_transporters_polypeptides <-
   function(save_table = FALSE) {
     drug_transporters_polypeptides <-
-      map_df(pkg.env$children, ~ get_transporters_polypeptide_df(.x))
+      map_df(pkg.env$children, ~ get_transporters_polypeptide_df(.x)) %>%
+      unique()
+
     if (save_table) {
       save_drug_sub(
         con = pkg.env$con,
@@ -298,7 +312,9 @@ parse_drug_transporters_polypeptides_external_identifiers <-
   function(save_table = FALSE) {
     drug_transporters_polypeptide_external_identifiers <-
       map_df(pkg.env$children,
-             ~ get_transporters_polypeptide_external_identifiers_df(.x))
+             ~ get_transporters_polypeptide_external_identifiers_df(.x)) %>%
+      unique()
+
     if (save_table) {
       save_drug_sub(
         con = pkg.env$con,
@@ -339,8 +355,11 @@ parse_drug_transporters_polypeptides_external_identifiers <-
 #' @export
 parse_drug_transporters_polypeptides_synonyms <-
   function(save_table = FALSE) {
-    drug_transporter_polypeptide_synonyms <- map_df(pkg.env$children,
-                                                    ~ get_transporters_polypeptide_synonyms_df(.x))
+    drug_transporter_polypeptide_synonyms <-
+      map_df(pkg.env$children,
+             ~ get_transporters_polypeptide_synonyms_df(.x)) %>%
+      unique()
+
     if (save_table) {
       save_drug_sub(
         con = pkg.env$con,
@@ -381,8 +400,11 @@ parse_drug_transporters_polypeptides_synonyms <-
 #' @export
 parse_drug_transporters_polypeptides_pfams <-
   function(save_table = FALSE) {
-    drug_transporters_polypeptides_pfams <- map_df(pkg.env$children,
-                                                   ~ get_transporters_polypeptide_pfams_df(.x))
+    drug_transporters_polypeptides_pfams <-
+      map_df(pkg.env$children,
+             ~ get_transporters_polypeptide_pfams_df(.x)) %>%
+      unique()
+
     if (save_table) {
       save_drug_sub(
         con = pkg.env$con,
@@ -424,8 +446,11 @@ parse_drug_transporters_polypeptides_pfams <-
 #' @export
 parse_drug_transporters_polypeptides_go_classifiers <-
   function(save_table = FALSE) {
-    drug_transporters_polypeptides_go_classifiers <- map_df(pkg.env$children,
-                                                            ~ get_transporters_polypeptide_go_classifiers_df(.x))
+    drug_transporters_polypeptides_go_classifiers <-
+      map_df(pkg.env$children,
+             ~ get_transporters_polypeptide_go_classifiers_df(.x)) %>%
+      unique()
+
     if (save_table) {
       save_drug_sub(
         con = pkg.env$con,
@@ -464,7 +489,10 @@ parse_drug_transporters_polypeptides_go_classifiers <-
 #' }
 #' @export
 parse_drug_transporters <- function(save_table = FALSE) {
-  drug_transporters <- map_df(pkg.env$children, ~ get_transporters_df(.x))
+  drug_transporters <-
+    map_df(pkg.env$children, ~ get_transporters_df(.x)) %>%
+    unique()
+
   if (save_table) {
     save_drug_sub(
       con = pkg.env$con,

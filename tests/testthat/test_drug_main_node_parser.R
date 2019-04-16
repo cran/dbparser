@@ -23,7 +23,7 @@ test_that(desc = "Read darug main attributes",
 
 test_that(desc = "Read darug groups attributes",
           code = {
-            expect_match(as.character(parse_drug_groups()[1][["text"]]), "approved")
+            expect_match(as.character(parse_drug_groups()[1][["group"]]), "approved")
             expect_error(parse_drug_groups(TRUE))
           })
 
@@ -45,10 +45,10 @@ test_that(desc = "Read darug links attributes",
             expect_error(parse_drug_links(TRUE))
           })
 
-test_that(desc = "Read darug classifications attributes",
+test_that(desc = "Read darug classification attributes",
           code = {
-            expect_match(parse_drug_classifications()[1][["parent_key"]], "DB00001")
-            expect_error(parse_drug_classifications(TRUE))
+            expect_match(parse_drug_classification()[1][["parent_key"]], "DB00001")
+            expect_error(parse_drug_classification(TRUE))
           })
 
 test_that(desc = "Read darug synonyms attributes",
@@ -84,7 +84,7 @@ test_that(desc = "Read darug packagers attributes",
 test_that(desc = "Read darug manufacturers attributes",
           code = {
             expect_match(
-              as.character(parse_drug_manufacturers()[["text"]][[1]]),
+              as.character(parse_drug_manufacturers()[["manufacturer"]][[1]]),
               "Bayer healthcare pharmaceuticals inc"
             )
             expect_error(parse_drug_manufacturers(TRUE))
@@ -106,7 +106,7 @@ test_that(desc = "Read darug categories attributes",
 
 test_that(desc = "Read darug affected organisms attributes",
           code = {
-            expect_match(as.character(parse_drug_affected_organisms()[["text"]][[1]]),
+            expect_match(as.character(parse_drug_affected_organisms()[["affected_organism"]][[1]]),
                          "Humans and other mammals")
             expect_error(parse_drug_affected_organisms(TRUE))
           })

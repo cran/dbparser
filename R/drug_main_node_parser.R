@@ -2,8 +2,10 @@
 drug_df <- function(rec) {
   tibble(
     primary_key = xmlValue(rec["drugbank-id"][[1]]),
-    secondary_key = ifelse(length(rec["drugbank-id"]) > 1, xmlValue(rec["drugbank-id"][[2]]), NA),
-    third_key = ifelse(length(rec["drugbank-id"]) > 2, xmlValue(rec["drugbank-id"][[3]]), NA),
+    other_keys = ifelse(length(rec["drugbank-id"]) > 1,
+                        paste(map_chr(c(2:length(rec["drugbank-id"])),
+                                      ~ xmlValue(rec["drugbank-id"][[.]]))
+                              , collapse = ","), NA),
     type = xmlGetAttr(node = rec, name = "type"),
     created = as.Date(xmlGetAttr(node = rec, name = "created")),
     updated = as.Date(xmlGetAttr(node = rec, name = "updated")),
@@ -11,6 +13,8 @@ drug_df <- function(rec) {
     description = xmlValue(rec[["description"]]),
     cas_number = xmlValue(rec[["cas-number"]]),
     unii = xmlValue(rec[["unii"]]),
+    average_mass = xmlValue(rec[["average-mass"]]),
+    monoisotopic_mass = xmlValue(rec[["monoisotopic-mass"]]),
     state = xmlValue(rec[["state"]]),
     groups_count = xmlSize(rec[["groups"]]),
     articles_count = xmlSize(rec[["general-references"]][["articles"]]),

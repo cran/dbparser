@@ -1,4 +1,4 @@
-context("test drug main attributes parsers")
+context("test biotech drug main attributes parsers")
 
 library(dbparser)
 library(testthat)
@@ -7,17 +7,23 @@ library(tibble)
 library(purrr)
 
 
-
+biotech <- "drugbank_record_biotech.xml"
 test_that(desc = "Read database",
           code = {
             expect_true(get_xml_db_rows(
-              system.file("extdata", "drugbank_record.xml", package = "dbparser")
+              system.file("extdata", biotech, package = "dbparser")
             ))
           })
 
-test_that(desc = "Read darug main attributes",
+test_that(desc = "Read darug primary key attribute",
           code = {
             expect_match(parse_drug()[1][["primary_key"]], "DB00001")
+            expect_error(parse_drug(TRUE))
+          })
+
+test_that(desc = "Read darug other keys attribute",
+          code = {
+            expect_match(parse_drug()$other_keys, "BIOD00024")
             expect_error(parse_drug(TRUE))
           })
 

@@ -1,4 +1,4 @@
-context("test drug reaction attributes parsers")
+context("test small molecule drug reaction attributes parsers")
 
 library(dbparser)
 library(testthat)
@@ -6,11 +6,11 @@ library(XML)
 library(tibble)
 library(purrr)
 
-
+biotech <- "drugbank_record_small_molecule.xml"
 test_that(desc = "Read database",
           code = {
             expect_true(get_xml_db_rows(
-              system.file("extdata", "drugbank_record.xml", package = "dbparser")
+              system.file("extdata", biotech, package = "dbparser")
             ))
           })
 

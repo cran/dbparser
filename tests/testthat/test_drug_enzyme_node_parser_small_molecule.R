@@ -1,4 +1,4 @@
-context("test drug enzymes attributes parsers")
+context("test small molecule drug enzymes attributes parsers")
 
 library(dbparser)
 library(testthat)
@@ -6,31 +6,32 @@ library(XML)
 library(tibble)
 library(purrr)
 
+small_molecule <- "drugbank_record_small_molecule.xml"
 test_that(desc = "Read database",
           code = {
             expect_true(get_xml_db_rows(
-              system.file("extdata", "drugbank_record.xml", package = "dbparser")
+              system.file("extdata", small_molecule, package = "dbparser")
             ))
           })
 
 test_that(desc = "Read darug enzymes attributes",
           code = {
             expect_equal(nrow(parse_drug_enzymes()),
-                         0)
+                         1)
             expect_error(parse_drug_enzymes(TRUE))
           })
 
 test_that(desc = "Read darug enzymes actions attributes",
           code = {
             expect_equal(nrow(parse_drug_enzymes_actions()),
-                         0)
+                         1)
             expect_error(parse_drug_enzymes_actions(TRUE))
           })
 
 test_that(desc = "Read darug enzymes articles attributes",
           code = {
             expect_equal(nrow(parse_drug_enzymes_articles()),
-                         0)
+                         1)
             expect_error(parse_drug_enzymes_articles(TRUE))
           })
 
@@ -52,7 +53,7 @@ test_that(desc = "Read darug enzymes links attributes",
 test_that(desc = "Read darug enzymes polypeptides attributes",
           code = {
             expect_equal(nrow(parse_drug_enzymes_polypeptides()),
-                         0)
+                         1)
             expect_error(parse_drug_enzymes_polypeptides(TRUE))
           })
 
@@ -61,7 +62,7 @@ test_that(desc = "Read darug enzymes polypeptides external identifiers attribute
             expect_equal(nrow(
               parse_drug_enzymes_polypeptides_external_identifiers()
             ),
-            0)
+            7)
             expect_error(parse_drug_enzymes_polypeptides_external_identifiers(TRUE))
           })
 
@@ -69,20 +70,20 @@ test_that(desc = "Read darug enzymes polypeptides external identifiers attribute
 test_that(desc = "Read darug enzymes polypeptides synonyms attributes",
           code = {
             expect_equal(nrow(parse_drug_enzymes_polypeptides_synonyms()),
-                         0)
+                         1)
             expect_error(parse_drug_enzymes_polypeptides_synonyms(TRUE))
           })
 
 test_that(desc = "Read darug enzymes polypeptides pfams attributes",
           code = {
             expect_equal(nrow(parse_drug_enzymes_polypeptides_pfams()),
-                         0)
+                         1)
             expect_error(parse_drug_enzymes_polypeptides_pfams(TRUE))
           })
 
 test_that(desc = "Read darug enzymes polypeptides go classifiers attributes",
           code = {
             expect_equal(nrow(parse_drug_enzymes_polypeptides_go_classifiers()),
-                         0)
+                         24)
             expect_error(parse_drug_enzymes_polypeptides_go_classifiers(TRUE))
           })

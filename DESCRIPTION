@@ -1,6 +1,6 @@
 Package: dbparser
 Title: 'DrugBank' Database XML Parser
-Version: 1.0.1
+Version: 1.0.2
 Authors@R: 
     c(
     person("Mohammed", "Ali", email = "moh_fcis@yahoo.com", role = c("aut", "cre")),
@@ -18,9 +18,9 @@ VignetteBuilder: knitr
 URL: https://dainanahan.github.io/dbparser/index.html
 BugReports: https://github.com/Dainanahan/dbparser/issues
 NeedsCompilation: no
-Packaged: 2019-04-16 07:58:53 UTC; Mohammed
+Packaged: 2019-07-08 14:20:09 UTC; Mohammed
 Author: Mohammed Ali [aut, cre],
   Ali Ezzat [aut]
 Maintainer: Mohammed Ali <moh_fcis@yahoo.com>
 Repository: CRAN
-Date/Publication: 2019-04-16 08:22:40 UTC
+Date/Publication: 2019-07-08 16:10:07 UTC

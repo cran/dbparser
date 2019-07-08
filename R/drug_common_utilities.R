@@ -9,6 +9,9 @@ drug_sub_df <-
            main_node,
            seconadary_node = NULL,
            id = "drugbank-id") {
+    if (is.null(rec[[main_node]])) {
+      return()
+    }
     parent_key <- NULL
     if (!is.null(id)) {
       parent_key <- xmlValue(rec[id][[1]])
@@ -55,7 +58,7 @@ drug_sub_df <-
 #' }
 #' @export
 get_xml_db_rows <- function(xml_db_name) {
-  ext <- file_ext(xml_db_name)
+  ext <- tools::file_ext(xml_db_name)
   dir_name <- dirname(xml_db_name)
   if (!ext %in% c("zip", "xml")) {
     stop("Unsupported file format, Kindly use an XML or zip file.")
@@ -64,6 +67,7 @@ get_xml_db_rows <- function(xml_db_name) {
   if (ext == "zip") {
     tryCatch(
       {
+        db <- unzip(xml_db_name, exdir = dir_name)
         db <- unzip(xml_db_name, list = TRUE)
         xml_db_name <- paste0(dir_name, "/", db$Name[1])
         message(xml_db_name)

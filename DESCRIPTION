@@ -1,6 +1,6 @@
 Package: dbparser
 Title: 'DrugBank' Database XML Parser
-Version: 1.0.2
+Version: 1.0.3
 Authors@R: 
     c(
     person("Mohammed", "Ali", email = "moh_fcis@yahoo.com", role = c("aut", "cre")),
@@ -11,16 +11,16 @@ Description: This tool is for parsing the 'DrugBank' XML database <http://drugba
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-Imports: DBI, dplyr, ggplot2, odbc, purrr, tibble, tidyr, tools, XML
-RoxygenNote: 6.1.0
+Imports: DBI, odbc, purrr, tibble, tidyr, tools, XML
+RoxygenNote: 6.1.1
 Suggests: knitr, rmarkdown, testthat
 VignetteBuilder: knitr
 URL: https://dainanahan.github.io/dbparser/index.html
 BugReports: https://github.com/Dainanahan/dbparser/issues
 NeedsCompilation: no
-Packaged: 2019-07-08 14:20:09 UTC; Mohammed
+Packaged: 2019-07-11 15:41:06 UTC; Mohammed
 Author: Mohammed Ali [aut, cre],
   Ali Ezzat [aut]
 Maintainer: Mohammed Ali <moh_fcis@yahoo.com>
 Repository: CRAN
-Date/Publication: 2019-07-08 16:10:07 UTC
+Date/Publication: 2019-07-11 22:21:28 UTC

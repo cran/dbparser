@@ -1,7 +1,7 @@
-90e85430db568d662bbb728ac68ad713 *DESCRIPTION
+efbd4a768e66106df4319cc228b1f5c2 *DESCRIPTION
 3091a3d97c0620fdbb14f05eec60b37b *LICENSE
 61087ec9de3e2b00d74fca9b7a70f902 *NAMESPACE
-df027d237d64cb93a49844f7c847427b *NEWS.md
+9ff69bece862816d942ec6dc515e5dd6 *NEWS.md
 329b297eb3694251bff225a860030cc7 *R/dbparser.R
 343cc9b312cc6707a74df1e4b4b5aff3 *R/drug_all_nodes_parser.R
 29842101a2667cec23790b4199551b55 *R/drug_atc_codes_node_parser.R
@@ -28,7 +28,7 @@ bd0db5402cc9abe9619dce0f4d664685 *R/drug_transporter_node_parser.R
 9e21a418ed58d3186ee5ce903f4b423f *build/vignette.rds
 8ba088930b65562d9460d91178f90fb1 *inst/doc/dbparser.R
 9c251e82a879be14dc0e68dc6ad73e48 *inst/doc/dbparser.Rmd
-31fe0244957199837b01addf75ec866f *inst/doc/dbparser.html
+2c57908f297eb06e5748285eeb20aa61 *inst/doc/dbparser.html
 b9acbfb1d0824d4ec80f8d858b0aad8b *inst/extdata/drugbank_record.xml
 8e8349fbb21d8c45424b8de615a685e4 *inst/extdata/drugbank_record.zip
 b9acbfb1d0824d4ec80f8d858b0aad8b *inst/extdata/drugbank_record_biotech.xml
@@ -120,7 +120,7 @@ b01949f97b168c2f6ef97ebcbffa79a3 *man/parse_drug_transporters_polypeptides_go_cl
 f22c8aea25672aff170c25af5ede8189 *man/parse_drug_transporters_polypeptides_synonyms.Rd
 0a3dab91f4b3ad8edc52b135890733fe *man/parse_drug_transporters_textbooks.Rd
 03a904a52c1f53c7e59cb9cef68d0b45 *tests/testthat.R
-c593f02091d7f100d0f5d3d1f4d7c976 *tests/testthat/test_drug_all_nodes_parser.R
+cf7c20bfd763aae8d7700e847cc8975c *tests/testthat/test_drug_all_nodes_parser.R
 5c68b0043933717fb3cabefdf2d4a06d *tests/testthat/test_drug_carrier_node_parser_biotech.R
 0edf2fac4dc63c63fb0b26bf12134a26 *tests/testthat/test_drug_carrier_node_parser_small_molecule.R
 c150e7114df59a48727d6fb7a52bb520 *tests/testthat/test_drug_enzyme_node_parser_biotech.R

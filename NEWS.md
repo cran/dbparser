@@ -1,3 +1,9 @@
+# dbparser 1.0.4
+* Fix save drugs dataframes as csv several issues
+* Update sql database dataframes saver functions
+* Update sql database saver functions documentations.
+* Support MariaDB and introduce related functionalities.
+
 # dbparser 1.0.3
 * Fix CRAN errors and notes
 

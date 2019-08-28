@@ -107,10 +107,19 @@ get_targets_polypeptide_go_classifiers_df <- function(rec) {
 #' @export
 parse_drug_targets_polypeptides_external_identifiers <-
   function(save_table = FALSE, save_csv = FALSE, csv_path = ".", override_csv = FALSE) {
-    drug_targets_polypeptide_external_identifiers <-
-      map_df(pkg.env$children,
-             ~ get_targets_polypeptide_external_identifiers_df(.x)) %>%
-      unique()
+    path <-
+      get_dataset_full_path("drug_targets_polypeptide_external_identifiers", csv_path)
+    if (!override_csv & file.exists(path)) {
+      drug_targets_polypeptide_external_identifiers <- readr::read_csv(path)
+    } else {
+      drug_targets_polypeptide_external_identifiers <-
+        map_df(pkg.env$children,
+               ~ get_targets_polypeptide_external_identifiers_df(.x)) %>%
+        unique()
+
+      write_csv(drug_targets_polypeptide_external_identifiers, save_csv, csv_path)
+    }
+
     if (save_table) {
       save_drug_sub(
         con = pkg.env$con,
@@ -119,7 +128,7 @@ parse_drug_targets_polypeptides_external_identifiers <-
         save_table_only = TRUE
       )
     }
-    return(tibble::as_tibble(drug_targets_polypeptide_external_identifiers))
+    return(drug_targets_polypeptide_external_identifiers)
   }
 
 
@@ -175,10 +184,19 @@ parse_drug_targets_polypeptides_external_identifiers <-
 #' @export
 parse_drug_targets_polypeptides_synonyms <-
   function(save_table = FALSE, save_csv = FALSE, csv_path = ".", override_csv = FALSE) {
-    drug_targets_polypeptide_synonyms <-
-      map_df(pkg.env$children,
-             ~ get_targets_polypeptide_synonyms_df(.x)) %>%
-      unique()
+    path <-
+      get_dataset_full_path("drug_targets_polypeptide_synonyms", csv_path)
+    if (!override_csv & file.exists(path)) {
+      drug_targets_polypeptide_synonyms <- readr::read_csv(path)
+    } else {
+      drug_targets_polypeptide_synonyms <-
+        map_df(pkg.env$children,
+               ~ get_targets_polypeptide_synonyms_df(.x)) %>%
+        unique()
+
+      write_csv(drug_targets_polypeptide_synonyms, save_csv, csv_path)
+    }
+
     if (save_table) {
       save_drug_sub(
         con = pkg.env$con,
@@ -243,10 +261,19 @@ parse_drug_targets_polypeptides_synonyms <-
 #' @export
 parse_drug_targets_polypeptides_pfams <-
   function(save_table = FALSE, save_csv = FALSE, csv_path = ".", override_csv = FALSE) {
-    drug_targets_polypeptide_pfams <-
-      map_df(pkg.env$children,
-             ~ get_targets_polypeptide_pfams_df(.x)) %>%
-      unique()
+    path <-
+      get_dataset_full_path("drug_targets_polypeptide_pfams", csv_path)
+    if (!override_csv & file.exists(path)) {
+      drug_targets_polypeptide_pfams <- readr::read_csv(path)
+    } else {
+      drug_targets_polypeptide_pfams <-
+        map_df(pkg.env$children,
+               ~ get_targets_polypeptide_pfams_df(.x)) %>%
+        unique()
+
+      write_csv(drug_targets_polypeptide_pfams, save_csv, csv_path)
+    }
+
 
     if (save_table) {
       save_drug_sub(
@@ -256,7 +283,7 @@ parse_drug_targets_polypeptides_pfams <-
         save_table_only = TRUE
       )
     }
-    return(tibble::as_tibble(drug_targets_polypeptide_pfams))
+    return(drug_targets_polypeptide_pfams)
   }
 
 
@@ -313,10 +340,19 @@ parse_drug_targets_polypeptides_pfams <-
 #' @export
 parse_drug_targets_polypeptides_go_classifiers <-
   function(save_table = FALSE, save_csv = FALSE, csv_path = ".", override_csv = FALSE) {
-    drug_targets_polypeptides_go_classifiers <-
-      map_df(pkg.env$children,
-             ~ get_targets_polypeptide_go_classifiers_df(.x)) %>%
-      unique()
+    path <-
+      get_dataset_full_path("drug_targets_polypeptides_go_classifiers", csv_path)
+    if (!override_csv & file.exists(path)) {
+      drug_targets_polypeptides_go_classifiers <- readr::read_csv(path)
+    } else {
+      drug_targets_polypeptides_go_classifiers <-
+        map_df(pkg.env$children,
+               ~ get_targets_polypeptide_go_classifiers_df(.x)) %>%
+        unique()
+
+      write_csv(drug_targets_polypeptides_go_classifiers, save_csv, csv_path)
+    }
+
 
     if (save_table) {
       save_drug_sub(
@@ -326,7 +362,7 @@ parse_drug_targets_polypeptides_go_classifiers <-
         save_table_only = TRUE
       )
     }
-    return(tibble::as_tibble(drug_targets_polypeptides_go_classifiers))
+    return(drug_targets_polypeptides_go_classifiers)
   }
 
 #' Extracts the drug targets actions element and return data as data frame.
@@ -379,13 +415,22 @@ parse_drug_targets_polypeptides_go_classifiers <-
 #' }
 #' @export
 parse_drug_targets_actions <- function(save_table = FALSE, save_csv = FALSE, csv_path = ".", override_csv = FALSE) {
-  drug_targets_actions <-
-    map_df(pkg.env$children, ~ get_targets_actions_df(.x)) %>%
-    unique()
+  path <-
+    get_dataset_full_path("drug_targets_actions", csv_path)
+  if (!override_csv & file.exists(path)) {
+    drug_targets_actions <- readr::read_csv(path)
+  } else {
+    drug_targets_actions <-
+      map_df(pkg.env$children, ~ get_targets_actions_df(.x)) %>%
+      unique()
+    write_csv(drug_targets_actions, save_csv, csv_path)
+  }
+
 
   if (nrow(drug_targets_actions) > 0) {
     colnames(drug_targets_actions) <- c("action", "target_id")
   }
+
 
   if (save_table) {
     save_drug_sub(
@@ -395,7 +440,7 @@ parse_drug_targets_actions <- function(save_table = FALSE, save_csv = FALSE, csv
       save_table_only = TRUE
     )
   }
-  return(tibble::as_tibble(drug_targets_actions))
+  return(drug_targets_actions)
 }
 
 #' Extracts the drug targets articles element and return data as data frame.
@@ -448,8 +493,17 @@ parse_drug_targets_actions <- function(save_table = FALSE, save_csv = FALSE, csv
 #' }
 #' @export
 parse_drug_targets_articles <- function(save_table = FALSE, save_csv = FALSE, csv_path = ".", override_csv = FALSE) {
-  drug_targets_articles <-
-    map_df(pkg.env$children, ~ get_targets_articles_df(.x)) %>% unique()
+  path <-
+    get_dataset_full_path("drug_targets_articles", csv_path)
+  if (!override_csv & file.exists(path)) {
+    drug_targets_articles <- readr::read_csv(path)
+  } else {
+    drug_targets_articles <-
+      map_df(pkg.env$children, ~ get_targets_articles_df(.x)) %>% unique()
+
+    write_csv(drug_targets_articles, save_csv, csv_path)
+  }
+
   if (save_table) {
     save_drug_sub(
       con = pkg.env$con,
@@ -458,7 +512,7 @@ parse_drug_targets_articles <- function(save_table = FALSE, save_csv = FALSE, cs
       save_table_only = TRUE
     )
   }
-  return(tibble::as_tibble(drug_targets_articles))
+  return(drug_targets_articles)
 }
 
 #' Extracts the drug targets textbooks element and return data as data frame.
@@ -511,8 +565,18 @@ parse_drug_targets_articles <- function(save_table = FALSE, save_csv = FALSE, cs
 #' }
 #' @export
 parse_drug_targets_textbooks <- function(save_table = FALSE, save_csv = FALSE, csv_path = ".", override_csv = FALSE) {
-  drug_targets_textbooks <-
-    map_df(pkg.env$children, ~ get_targets_textbooks_df(.x)) %>% unique()
+  path <-
+    get_dataset_full_path("drug_targets_textbooks", csv_path)
+  if (!override_csv & file.exists(path)) {
+    drug_targets_textbooks <- readr::read_csv(path)
+  } else {
+    drug_targets_textbooks <-
+      map_df(pkg.env$children, ~ get_targets_textbooks_df(.x)) %>% unique()
+
+    write_csv(drug_targets_textbooks, save_csv, csv_path)
+  }
+
+
   if (save_table) {
     save_drug_sub(
       con = pkg.env$con,
@@ -521,7 +585,7 @@ parse_drug_targets_textbooks <- function(save_table = FALSE, save_csv = FALSE, c
       save_table_only = TRUE
     )
   }
-  return(tibble::as_tibble(drug_targets_textbooks))
+  return(drug_targets_textbooks)
 }
 
 #' Extracts the drug targets links element and return data as data frame.
@@ -573,7 +637,18 @@ parse_drug_targets_textbooks <- function(save_table = FALSE, save_csv = FALSE, c
 #' }
 #' @export
 parse_drug_targets_links <- function(save_table = FALSE, save_csv = FALSE, csv_path = ".", override_csv = FALSE) {
-  drug_targets_links <- map_df(pkg.env$children, ~ get_targets_links_df(.x)) %>% unique()
+  path <-
+    get_dataset_full_path("drug_targets_links", csv_path)
+  if (!override_csv & file.exists(path)) {
+    drug_targets_links <- readr::read_csv(path)
+  } else {
+    drug_targets_links <- map_df(pkg.env$children, ~ get_targets_links_df(.x)) %>% unique()
+
+    write_csv(drug_targets_links, save_csv, csv_path)
+  }
+
+
+
   if (save_table) {
     save_drug_sub(
       con = pkg.env$con,
@@ -584,14 +659,14 @@ parse_drug_targets_links <- function(save_table = FALSE, save_csv = FALSE, csv_p
         title = paste("varchar(",
                       max(nchar(
                         drug_targets_links$title
-                      )) + 100, ")", sep = ""),
+                      ), na.rm = TRUE) + 100, ")", sep = ""),
         url = paste("varchar(", max(nchar(
           drug_targets_links$url
         )) + 100, ")", sep = "")
       )
     )
   }
-  return(tibble::as_tibble(drug_targets_links))
+  return(drug_targets_links)
 }
 
 #' Extracts the drug targets polypeptides element and return data as data frame.
@@ -645,9 +720,19 @@ parse_drug_targets_links <- function(save_table = FALSE, save_csv = FALSE, csv_p
 #' }
 #' @export
 parse_drug_targets_polypeptides <- function(save_table = FALSE, save_csv = FALSE, csv_path = ".", override_csv = FALSE) {
-  drug_targets_polypeptides <-
-    map_df(pkg.env$children, ~ get_targets_polypeptide_df(.x)) %>%
-    unique()
+  path <-
+    get_dataset_full_path("drug_targets_polypeptides", csv_path)
+  if (!override_csv & file.exists(path)) {
+    drug_targets_polypeptides <- readr::read_csv(path)
+  } else {
+    drug_targets_polypeptides <-
+      map_df(pkg.env$children, ~ get_targets_polypeptide_df(.x)) %>%
+      unique()
+
+    write_csv(drug_targets_polypeptides, save_csv, csv_path)
+  }
+
+
   if (save_table) {
     save_drug_sub(
       con = pkg.env$con,
@@ -657,7 +742,7 @@ parse_drug_targets_polypeptides <- function(save_table = FALSE, save_csv = FALSE
       field.types = list(
         general_function = paste("varchar(",
                                  max(
-                                   nchar(drug_targets_polypeptides$general_function)
+                                   nchar(drug_targets_polypeptides$general_function), na.rm = TRUE
                                  ),
                                  ")", sep = ""),
         specific_function = paste("varchar(max)", sep = ""),
@@ -719,15 +804,25 @@ parse_drug_targets_polypeptides <- function(save_table = FALSE, save_csv = FALSE
 #' }
 #' @export
 parse_drug_targets <- function(save_table = FALSE, save_csv = FALSE, csv_path = ".", override_csv = FALSE) {
-  drug_targets <-
-    map_df(pkg.env$children, ~ get_targets_df(.x)) %>%
-    unique()
+  path <-
+    get_dataset_full_path("drug_targets", csv_path)
+  if (!override_csv & file.exists(path)) {
+    drug_targets <- readr::read_csv(path)
+  } else {
+    drug_targets <-
+      map_df(pkg.env$children, ~ get_targets_df(.x)) %>%
+      unique()
+
+    write_csv(drug_targets, save_csv, csv_path)
+  }
+
+
   if (save_table) {
     save_drug_sub(
       con = pkg.env$con,
       df = drug_targets,
       table_name = "drug_targets",
-      foreign_key = "drug_key"
+      foreign_key = "parent_key"
     )
   }
   return(drug_targets)

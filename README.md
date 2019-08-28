@@ -24,30 +24,33 @@ You can install the released version of dbparser from
 ``` r
 install.packages("dbparser")
 ```
+
 or you can install the latest updates directly from the repo
 
 ``` r
 library(devtools)
 devtools::install_github("Dainanahan/dbparser")
 ```
+
 ## Example
 
 This is a basic example which shows you how to solve a common problem:
 
 ``` r
 ## parse data from XML and save it to memory
-get_xml_db_rows(
+dbparser::get_xml_db_rows(
               system.file("extdata", "drugbank_record.xml", package = "dbparser")
             )
+#> [1] TRUE
 
 ## load drugs data
-drugs <- parse_drug()
+drugs <- dbparser::parse_drug()
 
 ## load drug groups data
-drug_groups <- parse_drug_groups()
+drug_groups <- dbparser::parse_drug_groups()
 
 ## load drug targets actions data
-drug_targets_actions <- parse_drug_targets_actions()
+drug_targets_actions <- dbparser::parse_drug_targets_actions()
 ```
 
 ## Saving into a database
@@ -89,10 +92,12 @@ data.
 ## view proportions of the different drug types (biotech vs. small molecule)
 drugs %>% 
     select(type) %>% 
-    ggplot(aes(x = type)) + 
+    ggplot(aes(x = type, fill = type)) + 
     geom_bar() + 
     guides(fill=FALSE)     ## removes legend for the bar colors
 ```
+
+<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
 
 Below, we view the different `drug_groups` in the data and how prevalent
 they are.
@@ -100,10 +105,9 @@ they are.
 ``` r
 ## view proportions of the different drug types for each drug group
 drugs %>% 
-    rename(parent_key = primary_key) %>% 
-    full_join(drug_groups, by = 'parent_key') %>% 
-    select(type, text) %>% 
-    ggplot(aes(x = text, fill = type)) + 
+    full_join(drug_groups, by = c('primary_key' = 'drugbank_id')) %>% 
+    select(type, group) %>% 
+    ggplot(aes(x = group, fill = type)) + 
     geom_bar() + 
     theme(legend.position= 'bottom') + 
     labs(x = 'Drug Group', 
@@ -113,6 +117,8 @@ drugs %>%
     coord_flip()
 ```
 
+<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
+
 Finally, we look at the `drug_targets_actions` to observe their
 proportions as well.
 
@@ -120,14 +126,14 @@ proportions as well.
 ## get counts of the different target actions in the data
 targetActionCounts <- 
     drug_targets_actions %>% 
-    group_by(text) %>% 
+    group_by(action) %>% 
     summarise(count = n()) %>% 
     arrange(desc(count))
 
 ## get bar chart of the 10 most occurring target actions in the data
 p <- 
     ggplot(targetActionCounts[1:10,], 
-           aes(x = reorder(text,count), y = count, fill = letters[1:10])) + 
+           aes(x = reorder(action,count), y = count, fill = letters[1:10])) + 
     geom_bar(stat = 'identity') +
     labs(fill = 'action', 
          x = 'Target Action', 
@@ -141,3 +147,5 @@ p <-
 ## display plot
 p
 ```
+
+<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />

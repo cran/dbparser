@@ -4,6 +4,18 @@ pkg.env$con <- NULL
 pkg.env$version <- NULL
 pkg.env$exported_date <- NULL
 
+get_dataset_full_path <- function(data, csv_path = ".") {
+  return(ifelse(csv_path == ".", file.path(getwd(), paste0(data, ".csv")),
+                file.path(csv_path, paste0(data, ".csv"))))
+}
+
+write_csv <- function(data, save_csv = FALSE, csv_path = ".") {
+  if (save_csv) {
+    path <- get_dataset_full_path(deparse(substitute(data)), csv_path)
+    readr::write_csv(data, path)
+  }
+}
+
 drug_sub_df <-
   function(rec,
            main_node,
@@ -115,7 +127,7 @@ get_xml_db_rows <- function(xml_db_name) {
 #'
 #' @examples
 #' \donttest{
-#' open_db(xml_db_name =  "drugbank.xml", driver = "SQL Server",
+#' open_db(driver = "SQL Server",
 #' server = "MOHAMMED\\\\SQL2016", output_database = "drugbank2")
 #' }
 #' @export
@@ -135,6 +147,48 @@ open_db <-
 
   }
 
+#' Establish connection to given Maria database
+#'
+#' \code{open_mdb} opens connection to given Maria database.
+#'
+#' This function establishes connection to given Maria database
+#' to store, \emph{optionally}, the parsed drug bank elements.
+#'
+#' @param username database user name
+#' @param password database user password
+#' @param server string, indicated the db server name.
+#' @param output_database string, the database name to be used,
+#' it has to be created before using it
+#' @param host database host
+#' @param port database port
+#' @return sets the open connection in memory to be used by other functions
+#'
+#' @examples
+#' \donttest{
+#' open_mdb(username = "root", password = "root",
+#'  host = "localhost", port = 3306, output_database = "drugs")
+#' }
+#' @export
+open_mdb <-
+  function(username = "root",
+           password = "root",
+           server,
+           output_database,
+           host = "localhost",
+           port = 3306) {
+    # db connection
+    pkg.env$con <- RMariaDB::dbConnect(
+      drv = RMariaDB::MariaDB(),
+      dbname = output_database,
+      username = username,
+      password = password,
+      Server = server,
+      host = host,
+      port = port
+    )
+
+  }
+
 #' Close open drug bank sql database
 #'
 #' \code{close_db} closes connection to pre-given database.
@@ -149,3 +203,4 @@ open_db <-
 close_db <- function() {
   dbDisconnect(conn = pkg.env$con)
 }
+

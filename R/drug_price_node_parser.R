@@ -62,9 +62,17 @@ get_prices_df <- function(rec) {
 #' }
 #' @export
 parse_drug_prices <- function(save_table = FALSE, save_csv = FALSE, csv_path = ".", override_csv = FALSE) {
-  drug_prices <-
-    map_df(pkg.env$children, ~ get_prices_df(.x)) %>%
-    unique()
+  path <-
+    get_dataset_full_path("drug_prices", csv_path)
+  if (!override_csv & file.exists(path)) {
+    drug_prices <- readr::read_csv(path)
+  } else {
+    drug_prices <-
+      map_df(pkg.env$children, ~ get_prices_df(.x)) %>%
+      unique()
+
+    write_csv(drug_prices, save_csv, csv_path)
+  }
 
   if (save_table) {
     save_drug_sub(con = pkg.env$con,

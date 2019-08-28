@@ -73,15 +73,24 @@ parse_drug_reactions <-
            save_csv = FALSE,
            csv_path = ".",
            override_csv = FALSE) {
-    drug_reactions <-
-      map_df(pkg.env$children, ~ get_reactions_df(.x)) %>%
-      unique()
+    path <-
+      get_dataset_full_path("drug_reactions", csv_path)
+    if (!override_csv & file.exists(path)) {
+      drug_reactions <- readr::read_csv(path)
+    } else {
+      drug_reactions <-
+        map_df(pkg.env$children, ~ get_reactions_df(.x)) %>%
+        unique()
+
+      write_csv(drug_reactions, save_csv, csv_path)
+    }
+
     if (save_table) {
       save_drug_sub(
         con = pkg.env$con,
         df = drug_reactions,
         table_name = "drug_reactions",
-        foreign_key = "drug_key"
+        foreign_key = "parent_key"
       )
     }
     return(drug_reactions)
@@ -140,9 +149,19 @@ parse_drug_reactions_enzymes <-
            save_csv = FALSE,
            csv_path = ".",
            override_csv = FALSE) {
-    drug_reactions_enzymes <-
-      map_df(pkg.env$children, ~ get_reactions_enzymes_df(.x)) %>%
-      unique()
+    path <-
+      get_dataset_full_path("drug_reactions_enzymes", csv_path)
+    if (!override_csv & file.exists(path)) {
+      drug_reactions_enzymes <- readr::read_csv(path)
+    } else {
+      drug_reactions_enzymes <-
+        map_df(pkg.env$children, ~ get_reactions_enzymes_df(.x)) %>%
+        unique()
+
+      write_csv(drug_reactions_enzymes, save_csv, csv_path)
+    }
+
+
 
     if (save_table) {
       save_drug_sub(

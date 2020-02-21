@@ -7,37 +7,72 @@ library(tibble)
 library(purrr)
 
 classlist <- function(x) {
-  sapply(x, class)
+  map_df(x, class)
 }
 
-test_that(desc = "Read database",
-          code = {
-            expect_error(get_xml_db_rows("I_do_not_exist_file.xml"))
-            expect_error(get_xml_db_rows("drugbank_record"))
-          })
-drugs <- parse_drug_all()
-drugs_types <- classlist(drugs)
-test_that(desc = "Read all drug nodes",
-          code = {
-            expect_equal(length(drugs), 75)
-            expect_equal(length(drugs_types[1,] == "tbl_df"), 75)
-            expect_error(parse_drug_all(TRUE))
-          })
+test_that(
+  desc = "Read database incorrectly",
+  code = {
+    expect_error(read_drugbank_xml_db("I_do_not_exist_file.xml"))
+    expect_error(read_drugbank_xml_db("drugbank_record"))
+  }
+)
 
-test_that(desc = "Read selected drug nodes",
-          code = {
-            expect_equal(length(parse_drug_element()), 75)
-            expect_equal(length(parse_drug_element(c("all"))), 75)
-            expect_error(parse_drug_element(save_table = TRUE))
-            expect_error(parse_drug_element(c("all"), save_table = TRUE))
-            expect_error(parse_drug_element(c("notvalid")))
-            expect_error(parse_drug_element(c("drug_ahfs_codes", "notvalid")))
-            expect_equal(length(parse_drug_element_options()), 76)
-            expect_equal(length(parse_drug_element(
-              c(
-                "AHFS_Codes_Drug",
-                "Affected_Organisms_Drug",
-                "Textbooks_Transporter_Drug"
-              )
-            )), 3)
-          })
+test_that(
+  desc = "Parse Empty Data Set",
+  code = {
+    expect_error(drug_all())
+  }
+)
+
+biotech <- "drugbank_record_biotech.xml"
+test_that(
+  desc = "Read database",
+  code = {
+    expect_true(
+      read_drugbank_xml_db(
+        system.file("extdata", biotech, package = "dbparser")
+      )
+    )
+  }
+)
+drugs <- drug_all()
+drugs_types <- classlist(drugs)
+test_that(
+  desc = "Read all drug nodes",
+  code = {
+    expect_equal(length(drugs), 75)
+    expect_equal(dim(drugs_types), c(3, 75))
+  }
+)
+
+test_that(
+  desc = "Read selected drug nodes",
+  code = {
+    expect_equal(length(drug_element()), 75)
+    expect_equal(length(drug_element(c("all"))), 75)
+    expect_error(drug_element(save_table = TRUE))
+    expect_error(drug_element(c("all"), save_table = TRUE))
+    expect_error(drug_element(c("notvalid")))
+    expect_error(drug_element(c("drug_ahfs_codes", "notvalid")))
+    expect_equal(length(drug_element_options()), 76)
+    expect_equal(length(drug_element(
+      c(
+        "ahfs_codes_drug",
+        "affected_organisms_drug",
+        "textbooks_transporter_drug"
+      )
+    )), 3)
+  }
+)
+
+database_connection <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+drug_all(save_table = TRUE, database_connection = database_connection)
+test_that(
+  desc = "Test saving database tables",
+  code = {
+    expect_equal(length(DBI::dbListTables(database_connection)), 32)
+  }
+)
+
+DBI::dbDisconnect(database_connection)

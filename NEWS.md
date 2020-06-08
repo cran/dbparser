@@ -1,3 +1,14 @@
+# dbparser 1.1.2
+### Major Changes
+* Enhance many memory and performance issues for many parsers.
+* Change the drug classigication represenations to extract more useful
+infromation.
+### Minor Changes
+* Change some drug tibbles features names
+### DEFUNCT
+* Size columns in `drugs` main table is no longer exist, will do full 
+statistical analysis later using dvminer package.
+
 # dbparser 1.1.1
 
 * Fix column size issue while importing into SQL Server (#91)

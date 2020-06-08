@@ -66,7 +66,8 @@ drug <-
     if (!override_csv & file.exists(path)) {
       drugs <- readr::read_csv(path)
     } else {
-      drugs <- map_df(pkg_env$children, ~ drug_df(.x)) %>% unique()
+      drugs <- xmlSApply(xmlRoot(pkg_env$root), drug_row)
+      drugs <- as_tibble(t(drugs))
       write_csv(drugs, save_csv, csv_path)
     }
 
@@ -219,6 +220,7 @@ drug_groups <-
     } else {
       drug_groups <-
         map_df(pkg_env$children, ~ drug_sub_df(.x, "groups")) %>% unique()
+      names(drug_groups) <- c("group", "drugbank-id")
       write_csv(drug_groups, save_csv, csv_path)
     }
 

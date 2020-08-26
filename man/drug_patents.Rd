@@ -2,7 +2,11 @@
 % Please edit documentation in R/drug_parsers.R
 \name{drug_patents}
 \alias{drug_patents}
-\title{Extracts the drug patents element and return data as tibble.}
+\title{Drug Patents parser
+A property right issued by the United States Patent and Trademark
+Office (USPTO) to an inventor for a limited time, in exchange for public
+disclosure of the invention when the patent is granted. Drugs may be issued
+multiple patents.}
 \usage{
 drug_patents(
   save_table = FALSE,
@@ -28,63 +32,74 @@ user defined database. If \code{save_table} is enabled without providing
 value for this function an error will be thrown.}
 }
 \value{
-drug patents node attributes tibble
+a tibble with the following variables:
+\describe{
+ \item{number}{The patent number(s) associated with the drug.}
+ \item{country}{The country that issued the patent rights.}
+ \item{approved}{The date that the patent request was filed.}
+ \item{expires}{The date that the patent rights expire.}
+ \item{pediatric-extension}{Indicates whether or not a pediatric extension has been approved for
+  the patent. Granted pediatric extensions provide an additional 6 months of
+  market protection.}
+ \item{\emph{drugbank_id}}{drugbank id}
+}
 }
 \description{
-\code{drug_patents} returns tibble of drug patents elements.
+Drug Patents parser
+A property right issued by the United States Patent and Trademark
+Office (USPTO) to an inventor for a limited time, in exchange for public
+disclosure of the invention when the patent is granted. Drugs may be issued
+multiple patents.
 }
-\details{
-This functions extracts the patents element of drug node in drugbank
-xml database with the option to save it in a predefined database via
-passed database connection. It takes two optional arguments to
-save the returned tibble in the database \code{save_table} and
- \code{database_connection}.
-It must be called after \code{\link{read_drugbank_xml_db}} function like
-any other parser function.
+\section{read_drugbank_xml_db}{
+
+\code{\link{read_drugbank_xml_db}} function must be called first before any
+parser.
+
 If \code{\link{read_drugbank_xml_db}} is called before for any reason, so
 no need to call it again before calling this function.
 }
+
 \examples{
 \dontrun{
+# the same parameters and usage will be applied for any parser
 # return only the parsed tibble
-drug_patents()
+run_all_parsers()
 
 # will throw an error, as database_connection is NULL
-drug_patents(save_table = TRUE)
+run_all_parsers(save_table = TRUE)
 
 # save in database in SQLite in memory database and return parsed tibble
 sqlite_con <- DBI::dbConnect(RSQLite::SQLite())
-drug_patents(save_table = TRUE, database_connection = sqlite_con)
+run_all_parsers(save_table = TRUE, database_connection = sqlite_con)
 
-# save parsed tibble as csv if it does not exist in current
-# location and return parsed tibble.
-# If the csv exist before read it and return its data.
-drug_patents(save_csv = TRUE)
+# save parsed tibble as csv if it does not exist in current location,
+# and return parsed tibble.
+# if the csv exist before read it and return its data.
+run_all_parsers(save_csv = TRUE)
 
-# save in database, save parsed tibble as csv if it does not exist
-# 'in current location and return parsed tibble.
-# If the csv exist before read it and return its data.
-drug_patents(save_table = TRUE, save_csv = TRUE,
- database_connection = sqlite_con)
+# save in database, save parsed tibble as csv,
+# if it does not exist in current location and return parsed tibble.
+# if the csv exist before read it and return its data.
+run_all_parsers(save_table = TRUE, save_csv = TRUE,
+database_connection = sqlite_con)
 
-# save parsed tibble as csv if it does not exist in given
-# location and return parsed tibble.
-# If the csv exist before read it and return its data.
-drug_patents(save_csv = TRUE, csv_path = TRUE)
+# save parsed tibble as csv if it does not exist in given location,
+# and return parsed tibble.
+# if the csv exist before read it and return its data.
+run_all_parsers(save_csv = TRUE, csv_path = TRUE)
 
-# save parsed tibble as csv if it does not exist in current
-# location and return parsed tibble.
-# If the csv exist override it and return it.
-drug_patents(save_csv = TRUE, csv_path = TRUE, override = TRUE)
+# save parsed tibble as csv if it does not exist in current location and
+# return parsed tibble.
+# if the csv exist override it and return it.
+run_all_parsers(save_csv = TRUE, csv_path = TRUE, override = TRUE)
 }
 }
 \seealso{
 Other drugs: 
 \code{\link{drug_affected_organisms}()},
 \code{\link{drug_ahfs_codes}()},
-\code{\link{drug_articles}()},
 \code{\link{drug_atc_codes}()},
-\code{\link{drug_books}()},
 \code{\link{drug_calc_prop}()},
 \code{\link{drug_categories}()},
 \code{\link{drug_classification}()},
@@ -93,19 +108,23 @@ Other drugs:
 \code{\link{drug_exp_prop}()},
 \code{\link{drug_external_links}()},
 \code{\link{drug_food_interactions}()},
+\code{\link{drug_general_information}()},
 \code{\link{drug_groups}()},
 \code{\link{drug_interactions}()},
 \code{\link{drug_intern_brand}()},
-\code{\link{drug_links}()},
 \code{\link{drug_manufacturers}()},
 \code{\link{drug_mixtures}()},
 \code{\link{drug_packagers}()},
 \code{\link{drug_pdb_entries}()},
+\code{\link{drug_pharmacology}()},
+\code{\link{drug_prices}()},
 \code{\link{drug_products}()},
+\code{\link{drug_reactions_enzymes}()},
+\code{\link{drug_reactions}()},
 \code{\link{drug_salts}()},
+\code{\link{drug_sequences}()},
 \code{\link{drug_snp_adverse_reactions}()},
 \code{\link{drug_snp_effects}()},
-\code{\link{drug_syn}()},
-\code{\link{drug}()}
+\code{\link{drug_syn}()}
 }
 \concept{drugs}

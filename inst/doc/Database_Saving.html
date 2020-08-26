@@ -12,7 +12,7 @@
 
 <meta name="author" content="Mohammed Ali" />
 
-<meta name="date" content="2020-06-08" />
+<meta name="date" content="2020-08-25" />
 
 <title>Saving data into Database</title>
 
@@ -301,7 +301,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Saving data into Database</h1>
 <h4 class="author">Mohammed Ali</h4>
-<h4 class="date">2020-06-08</h4>
+<h4 class="date">2020-08-25</h4>
 
 
 
@@ -326,7 +326,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <a class="sourceLine" id="cb1-7" title="7"><span class="co"># Use DrugBank sample database in the library</span></a>
 <a class="sourceLine" id="cb1-8" title="8"><span class="kw">read_drugbank_xml_db</span>(<span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, biotech, <span class="dt">package =</span> <span class="st">&quot;dbparser&quot;</span>))</a>
 <a class="sourceLine" id="cb1-9" title="9"><span class="co"># Parse all available drug tibbles</span></a>
-<a class="sourceLine" id="cb1-10" title="10"><span class="kw">drug_all</span>(<span class="dt">save_table =</span> <span class="ot">TRUE</span>, <span class="dt">database_connection =</span> database_connection)</a>
+<a class="sourceLine" id="cb1-10" title="10"><span class="kw">run_all_parsers</span>(<span class="dt">save_table =</span> <span class="ot">TRUE</span>, <span class="dt">database_connection =</span> database_connection)</a>
 <a class="sourceLine" id="cb1-11" title="11"><span class="co"># List saved tables</span></a>
 <a class="sourceLine" id="cb1-12" title="12">DBI<span class="op">::</span><span class="kw">dbListTables</span>(database_connection)</a>
 <a class="sourceLine" id="cb1-13" title="13"><span class="co"># Close SQLite connection</span></a>
@@ -354,7 +354,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <a class="sourceLine" id="cb2-9" title="9"><span class="co"># DrugBank database sample name</span></a>
 <a class="sourceLine" id="cb2-10" title="10"><span class="kw">read_drugbank_xml_db</span>(<span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, biotech, <span class="dt">package =</span> <span class="st">&quot;dbparser&quot;</span>))</a>
 <a class="sourceLine" id="cb2-11" title="11"><span class="co"># Parse all available drug tibbles</span></a>
-<a class="sourceLine" id="cb2-12" title="12"><span class="kw">drug_all</span>(<span class="dt">save_table =</span> <span class="ot">TRUE</span>, <span class="dt">database_connection =</span> con)</a>
+<a class="sourceLine" id="cb2-12" title="12"><span class="kw">run_all_parsers</span>(<span class="dt">save_table =</span> <span class="ot">TRUE</span>, <span class="dt">database_connection =</span> con)</a>
 <a class="sourceLine" id="cb2-13" title="13"><span class="co"># List saved tables</span></a>
 <a class="sourceLine" id="cb2-14" title="14">DBI<span class="op">::</span><span class="kw">dbListTables</span>(con)</a>
 <a class="sourceLine" id="cb2-15" title="15"><span class="co"># Close SQLServer connection</span></a>
@@ -384,7 +384,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <a class="sourceLine" id="cb3-10" title="10"><span class="co"># DrugBank database sample name</span></a>
 <a class="sourceLine" id="cb3-11" title="11"><span class="kw">read_drugbank_xml_db</span>(<span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, biotech, <span class="dt">package =</span> <span class="st">&quot;dbparser&quot;</span>))</a>
 <a class="sourceLine" id="cb3-12" title="12"><span class="co"># Parse all available drug tibbles</span></a>
-<a class="sourceLine" id="cb3-13" title="13"><span class="kw">drug_all</span>(<span class="dt">save_table =</span> <span class="ot">TRUE</span>, <span class="dt">database_connection =</span> con)</a>
+<a class="sourceLine" id="cb3-13" title="13"><span class="kw">run_all_parsers</span>(<span class="dt">save_table =</span> <span class="ot">TRUE</span>, <span class="dt">database_connection =</span> con)</a>
 <a class="sourceLine" id="cb3-14" title="14"><span class="co"># List saved tables</span></a>
 <a class="sourceLine" id="cb3-15" title="15">RMariaDB<span class="op">::</span><span class="kw">dbListTables</span>(con)</a>
 <a class="sourceLine" id="cb3-16" title="16"><span class="co"># Close SQLServer connection</span></a>

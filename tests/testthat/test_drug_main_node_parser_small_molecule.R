@@ -20,9 +20,9 @@ test_that(
 test_that(
   desc = "Read drug primary key attribute",
   code = {
-    expect_match(drug()[1][["primary_key"]], "DB00006")
-    expect_true(is_tibble(drug()))
-    expect_error(drug(TRUE))
+    expect_match(drug_general_information()[1][["primary_key"]], "DB00006")
+    expect_true(is_tibble(drug_general_information()))
+    expect_error(drug_general_information(TRUE))
   }
 )
 
@@ -30,18 +30,18 @@ test_that(
   desc = "Read drug other keys attribute",
   code = {
     expect_match(
-      drug()$other_keys,
+      drug_general_information()$other_keys,
       "BTD00076;EXPT03302;BIOD00076;DB02351"
     )
-    expect_error(drug(TRUE))
+    expect_error(drug_general_information(TRUE))
   }
 )
 
 test_that(
   desc = "Read drug some small attributes",
   code = {
-    expect_match(drug()$average_mass, "2180.2853")
-    expect_match(drug()$monoisotopic_mass, "2178.985813062")
+    expect_match(drug_general_information()$average_mass, "2180.2853")
+    expect_match(drug_general_information()$monoisotopic_mass, "2178.985813062")
   }
 )
 
@@ -54,35 +54,6 @@ test_that(
     )
     expect_true(is_tibble(drug_groups()))
     expect_error(drug_groups(TRUE))
-  }
-)
-
-test_that(
-  desc = "Read drug articles attributes",
-  code = {
-    expect_match(as.character(
-      drug_articles()[["pubmed-id"]][1]
-    ), "16466327")
-    expect_true(is_tibble(drug_articles()))
-    expect_error(drug_articles(TRUE))
-  }
-)
-
-test_that(
-  desc = "Read drug books attributes",
-  code = {
-    expect_equal(nrow(drug_books()), 0)
-    expect_true(is_tibble(drug_books()))
-    expect_error(drug_books(TRUE))
-  }
-)
-
-test_that(
-  desc = "Read drug links attributes",
-  code = {
-    expect_equal(nrow(drug_links()), 0)
-    expect_true(is_tibble(drug_links()))
-    expect_error(drug_links(TRUE))
   }
 )
 
@@ -107,18 +78,6 @@ test_that(
     )
     expect_true(is_tibble(drug_syn()))
     expect_error(drug_syn(TRUE))
-  }
-)
-
-test_that(
-  desc = "Read drug articles attributes",
-  code = {
-    expect_match(
-      as.character(drug_articles()[["pubmed-id"]][1]),
-      "16466327"
-    )
-    expect_true(is_tibble(drug_articles()))
-    expect_error(drug_articles(TRUE))
   }
 )
 
@@ -354,7 +313,7 @@ test_that(
       as.character(drug_external_links()[["resource"]][[1]]),
       "RxList"
     )
-    expect_true(is_tibble(drug_links()))
+    expect_true(is_tibble(drugs_links()))
     expect_error(drug_external_links(TRUE))
   }
 )
@@ -381,5 +340,31 @@ test_that(
     )
     expect_true(is_tibble(drug_snp_adverse_reactions()))
     expect_error(drug_snp_adverse_reactions(TRUE))
+  }
+)
+
+test_that(
+  desc = "Read drug international brands attributes",
+  code = {
+    expect_equal(
+      nrow(drug_intern_brand()),
+      1
+    )
+    expect_match(
+      as.character(drug_intern_brand()[1][["brand"]]),
+      "Angiox"
+    )
+    expect_true(is_tibble(drug_intern_brand()))
+    expect_error(drug_intern_brand(TRUE))
+  }
+)
+
+test_that(
+  desc = "Read drug pharmacology indication attribute",
+  code = {
+    expect_match(drug_pharmacology()[["metabolism"]][1],
+                 "80% proteolytic cleavage")
+    expect_true(is_tibble(drug_pharmacology()))
+    expect_error(drug_pharmacology(TRUE))
   }
 )

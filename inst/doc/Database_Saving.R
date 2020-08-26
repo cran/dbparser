@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 #  # Use DrugBank sample database in the library
 #  read_drugbank_xml_db(system.file("extdata", biotech, package = "dbparser"))
 #  # Parse all available drug tibbles
-#  drug_all(save_table = TRUE, database_connection = database_connection)
+#  run_all_parsers(save_table = TRUE, database_connection = database_connection)
 #  # List saved tables
 #  DBI::dbListTables(database_connection)
 #  # Close SQLite connection
@@ -34,7 +34,7 @@ knitr::opts_chunk$set(
 #  # DrugBank database sample name
 #  read_drugbank_xml_db(system.file("extdata", biotech, package = "dbparser"))
 #  # Parse all available drug tibbles
-#  drug_all(save_table = TRUE, database_connection = con)
+#  run_all_parsers(save_table = TRUE, database_connection = con)
 #  # List saved tables
 #  DBI::dbListTables(con)
 #  # Close SQLServer connection
@@ -53,7 +53,7 @@ knitr::opts_chunk$set(
 #  # DrugBank database sample name
 #  read_drugbank_xml_db(system.file("extdata", biotech, package = "dbparser"))
 #  # Parse all available drug tibbles
-#  drug_all(save_table = TRUE, database_connection = con)
+#  run_all_parsers(save_table = TRUE, database_connection = con)
 #  # List saved tables
 #  RMariaDB::dbListTables(con)
 #  # Close SQLServer connection

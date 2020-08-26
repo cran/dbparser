@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 ## Introduction
 The main purpose of the `dbparser` package is to parse the 
-[DrugBank](http://drugbank.ca/) database which is downloadable in XML format 
+[DrugBank](https://www.drugbank.ca/) database which is downloadable in XML format 
 from [this link](https://www.drugbank.ca/releases/latest). The parsed data can 
 then be explored and analyzed as desired by the user. 
 In this tutorial, we will see how to use `dbparser` along with `dplyr` and 
@@ -31,7 +31,7 @@ In this tutorial, we will see how to use `dbparser` along with `dplyr` and
 Before starting the code we are assuming the following:
 
 - user already downloaded *DrugBank* xml database file based on the
-[Read Me](https://docs.ropensci.org/dbparser) instructions or the above note,
+[Read Me](https://docs.ropensci.org/dbparser/) instructions or the above note,
 - user saved the downloaded database in working directory as `C:\`.
 - user named the downloaded xml file **drugbank.xml**. 
 

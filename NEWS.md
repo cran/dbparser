@@ -1,8 +1,37 @@
+# dbparser 1.2.0
+
+## UI Changes
+* Introduce progress bar in parser functions
+
+## New Parsers
+### Collective Parsers
+* `drugs`, `cett` and `References` Parsers
+
+### Elements Parsers
+* `attachments` parsers for drugs and CETT
+* `drug_pharmacology` parser
+* Rename `drugs_books` parser to `drugs_textbooks`
+* Rename `drug_all` parser to `run_all_parsers`
+* renam `drug` parser to `drug_general_information`
+
+## Documentation Update:
+* Add returned parsed data structure 
+* Explain the returned data functionality as a whole and for each elements
+* Point out to related/similar parsers
+
+## Package design
+For those who thinking to contribute in `dbparser`, now parsers are implemented
+as R6 classes.
+
+## Minor Fixes
+* Update database saver functions to accommodate new DrugBank data size.
+
 # dbparser 1.1.2
+
 ### Major Changes
 * Enhance many memory and performance issues for many parsers.
-* Change the drug classigication represenations to extract more useful
-infromation.
+* Change the drug classification representations to extract more useful
+information.
 ### Minor Changes
 * Change some drug tibbles features names
 ### DEFUNCT

@@ -1,33 +1,30 @@
 Package: dbparser
-Title: 'DrugBank' Database XML Parser
-Version: 1.2.0
+Title: Drugs Databases Parser
+Version: 2.0.0
 Authors@R: 
     c(
     person("Mohammed", "Ali", email = "moh_fcis@yahoo.com", role = c("aut", "cre")),
     person("Ali", "Ezzat", email = "ali_ezzat85@yahoo.com", role = "aut"),
     person("Hao", "Zhu", email = "haozhu233@gmail.com", role = "rev"),
     person("Emma", "Mendelsohn", email = "", role = "rev"))
-Description: This tool is for parsing the 'DrugBank' XML database <https://www.drugbank.ca/>. The parsed 
-    data are then returned in a proper 'R' dataframe with the ability to save 
-    them in a given database.
+Description: This tool is for parsing public drug databases such as 'DrugBank' XML database <https://go.drugbank.com/>.
+    The parsed data are then returned in a proper 'R' object called 'dvobject'.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
-Imports: DBI, dplyr, odbc, progress, purrr, readr, RMariaDB, RSQLite,
-        tibble, tools, XML
-RoxygenNote: 7.1.0
+Imports: dplyr, progress, purrr, tibble, tools, XML
+RoxygenNote: 7.2.3
 Suggests: knitr, rmarkdown, testthat
 VignetteBuilder: knitr
 URL: https://docs.ropensci.org/dbparser/,
         https://github.com/ropensci/dbparser/
 BugReports: https://github.com/ropensci/dbparser/issues
-Depends: R (>= 2.10)
+Depends: R (>= 3.5)
 NeedsCompilation: no
-Packaged: 2020-08-25 15:50:51 UTC; Mohammed
+Packaged: 2023-03-17 04:19:11 UTC; LEGION
 Author: Mohammed Ali [aut, cre],
   Ali Ezzat [aut],
   Hao Zhu [rev],
   Emma Mendelsohn [rev]
 Maintainer: Mohammed Ali <moh_fcis@yahoo.com>
 Repository: CRAN
-Date/Publication: 2020-08-26 12:10:03 UTC
+Date/Publication: 2023-03-17 08:30:02 UTC

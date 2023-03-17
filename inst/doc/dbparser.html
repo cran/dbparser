@@ -12,76 +12,107 @@
 
 <meta name="author" content="Mohammed Ali, Ali Ezzat" />
 
-<meta name="date" content="2020-08-25" />
+<meta name="date" content="2023-03-17" />
 
 <title>DrugBank Database XML Parser</title>
 
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
 
 
-<style type="text/css">code{white-space: pre;}</style>
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
 <style type="text/css" data-origin="pandoc">
-a.sourceLine { display: inline-block; line-height: 1.25; }
-a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
-a.sourceLine:empty { height: 1.2em; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-a.sourceLine { text-indent: -1em; padding-left: 1em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
-pre.numberSource a.sourceLine
-  { position: relative; left: -4em; }
-pre.numberSource a.sourceLine::before
-  { content: attr(title);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; pointer-events: all; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-    color: #aaaaaa;
-  }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
 div.sourceCode
-  {  }
+{ }
 @media screen {
-a.sourceLine::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
 </style>
 <script>
 // apply pandoc div.sourceCode style to pre.sourceCode instead
@@ -90,13 +121,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   for (var i = 0; i < sheets.length; i++) {
     if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
     try { var rules = sheets[i].cssRules; } catch (e) { continue; }
-    for (var j = 0; j < rules.length; j++) {
+    var j = 0;
+    while (j < rules.length) {
       var rule = rules[j];
       // check if there is a div.sourceCode rule
-      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -104,6 +142,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   }
 })();
 </script>
+
 
 
 
@@ -301,92 +340,105 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">DrugBank Database XML Parser</h1>
 <h4 class="author">Mohammed Ali, Ali Ezzat</h4>
-<h4 class="date">2020-08-25</h4>
+<h4 class="date">2023-03-17</h4>
 
 
 
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>The main purpose of the <code>dbparser</code> package is to parse the <a href="https://www.drugbank.ca/">DrugBank</a> database which is downloadable in XML format from <a href="https://www.drugbank.ca/releases/latest">this link</a>. The parsed data can then be explored and analyzed as desired by the user. In this tutorial, we will see how to use <code>dbparser</code> along with <code>dplyr</code> and <code>ggplot2</code> along with other libraries to do simple drug analysis</p>
+<p>The main purpose of the <code>dbparser</code> package is to parse the
+<a href="https://go.drugbank.com/">DrugBank</a> database which is
+downloadable in XML format from <a href="https://go.drugbank.com/releases/latest">this link</a>. The parsed
+data can then be explored and analyzed as desired by the user. In this
+tutorial, we will see how to use <code>dbparser</code> along with
+<code>dplyr</code> and <code>ggplot2</code> along with other libraries
+to do simple drug analysis</p>
 </div>
 <div id="loading-and-parsing-the-data" class="section level2">
 <h2>Loading and Parsing the Data</h2>
 <p>Before starting the code we are assuming the following:</p>
 <ul>
-<li>user already downloaded <em>DrugBank</em> xml database file based on the <a href="https://docs.ropensci.org/dbparser/">Read Me</a> instructions or the above note,</li>
-<li>user saved the downloaded database in working directory as <code>C:\</code>.</li>
-<li>user named the downloaded xml file <strong>drugbank.xml</strong>.</li>
+<li>user already downloaded <em>DrugBank</em> xml database file based on
+the <a href="https://docs.ropensci.org/dbparser/">Read Me</a>
+instructions or the above note,</li>
+<li>user saved the downloaded database in working directory as
+<code>C:\</code>.</li>
+<li>user named the downloaded xml file
+<strong>drugbank.xml</strong>.</li>
 </ul>
-<p>Now we can loads the <code>drugs</code> info, <code>drug groups</code> info and <code>drug targets</code> actions info.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="co">## load dbparser package</span></a>
-<a class="sourceLine" id="cb1-2" title="2"><span class="kw">library</span>(dbparser)</a>
-<a class="sourceLine" id="cb1-3" title="3"><span class="kw">library</span>(dplyr)</a>
-<a class="sourceLine" id="cb1-4" title="4"><span class="kw">library</span>(ggplot2)</a>
-<a class="sourceLine" id="cb1-5" title="5"><span class="kw">library</span>(XML)</a>
-<a class="sourceLine" id="cb1-6" title="6"></a>
-<a class="sourceLine" id="cb1-7" title="7"><span class="co">## parse data from XML and save it to memory</span></a>
-<a class="sourceLine" id="cb1-8" title="8"><span class="kw">read_drugbank_xml_db</span>(<span class="st">&quot;C:\drugbank.xml&quot;</span>)</a>
-<a class="sourceLine" id="cb1-9" title="9"></a>
-<a class="sourceLine" id="cb1-10" title="10"><span class="co">## load drugs data</span></a>
-<a class="sourceLine" id="cb1-11" title="11">drugs &lt;-<span class="st"> </span><span class="kw">drug</span>()</a>
-<a class="sourceLine" id="cb1-12" title="12"></a>
-<a class="sourceLine" id="cb1-13" title="13"><span class="co">## load drug groups data</span></a>
-<a class="sourceLine" id="cb1-14" title="14">drug_groups &lt;-<span class="st"> </span><span class="kw">drug_groups</span>()</a>
-<a class="sourceLine" id="cb1-15" title="15"></a>
-<a class="sourceLine" id="cb1-16" title="16"><span class="co">## load drug targets actions data</span></a>
-<a class="sourceLine" id="cb1-17" title="17">drug_targets_actions &lt;-<span class="st"> </span><span class="kw">targets_actions</span>()</a></code></pre></div>
-<div id="saving-into-database" class="section level3">
-<h3>Saving into Database</h3>
-<p>User can save parsed tibbles in database by enabling <code>save_table</code> option. More details about that can be found in <a href="https://docs.ropensci.org/dbparser/articles/Database_Saving.html">database tutorial</a></p>
-</div>
+<p>Now we can loads the <code>drugs</code> info,
+<code>drug groups</code> info and <code>drug targets</code> actions
+info.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="do">## load dbparser package</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dbparser)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(XML)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="do">## parse data from XML and save it to memory</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>dvobj <span class="ot">&lt;-</span> <span class="fu">parseDrugBank</span>(<span class="st">&quot;C:\drugbank.xml&quot;</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="do">## load drugs data</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>drugs <span class="ot">&lt;-</span> dvobj<span class="sc">$</span>drugs<span class="sc">$</span>general_information</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="do">## load drug groups data</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>drug_groups <span class="ot">&lt;-</span> dvobj<span class="sc">$</span>drugs<span class="sc">$</span>groups</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="do">## load drug targets actions data</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>drug_targets_actions <span class="ot">&lt;-</span> dvobj<span class="sc">$</span>cett<span class="sc">$</span>targets<span class="sc">$</span>actions</span></code></pre></div>
 </div>
 <div id="exploring-the-data" class="section level2">
 <h2>Exploring the data</h2>
-<p>Following is an example involving a quick look at a few aspects of the parsed data. First we look at the proportions of <code>biotech</code> and <code>small-molecule</code> drugs in the data.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="co">## view proportions of the different drug types (biotech vs. small molecule)</span></a>
-<a class="sourceLine" id="cb2-2" title="2">drugs <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb2-3" title="3"><span class="st">    </span><span class="kw">select</span>(type) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb2-4" title="4"><span class="st">    </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> type, <span class="dt">fill =</span> type)) <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb2-5" title="5"><span class="st">    </span><span class="kw">geom_bar</span>() <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb2-6" title="6"><span class="st">    </span><span class="kw">guides</span>(<span class="dt">fill =</span> <span class="ot">FALSE</span>)     <span class="co">## removes legend for the bar colors</span></a></code></pre></div>
-<p>Below, we view the different <code>drug_groups</code> in the data and how prevalent they are.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="co">## view proportions of the different drug types for each drug group</span></a>
-<a class="sourceLine" id="cb3-2" title="2">drugs <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb3-3" title="3"><span class="st">    </span><span class="kw">full_join</span>(drug_groups, <span class="dt">by =</span> <span class="kw">c</span>(<span class="st">&#39;primary_key&#39;</span> =<span class="st"> &#39;drugbank_id&#39;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb3-4" title="4"><span class="st">    </span><span class="kw">select</span>(type, group) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb3-5" title="5"><span class="st">    </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> group, <span class="dt">fill =</span> type)) <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb3-6" title="6"><span class="st">    </span><span class="kw">geom_bar</span>() <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb3-7" title="7"><span class="st">    </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">&#39;bottom&#39;</span>) <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb3-8" title="8"><span class="st">    </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">&#39;Drug Group&#39;</span>, </a>
-<a class="sourceLine" id="cb3-9" title="9">         <span class="dt">y =</span> <span class="st">&#39;Quantity&#39;</span>, </a>
-<a class="sourceLine" id="cb3-10" title="10">         <span class="dt">title =</span> <span class="st">&quot;Drug Type Distribution per Drug Group&quot;</span>, </a>
-<a class="sourceLine" id="cb3-11" title="11">         <span class="dt">caption =</span> <span class="st">&quot;created by ggplot&quot;</span>) <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb3-12" title="12"><span class="st">    </span><span class="kw">coord_flip</span>()</a></code></pre></div>
-<p>Finally, we look at the <code>drug_targets_actions</code> to observe their proportions as well.</p>
+<p>Following is an example involving a quick look at a few aspects of
+the parsed data. First we look at the proportions of
+<code>biotech</code> and <code>small-molecule</code> drugs in the
+data.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="do">## view proportions of the different drug types (biotech vs. small molecule)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>drugs <span class="sc">%&gt;%</span> </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(type) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> type, <span class="at">fill =</span> type)) <span class="sc">+</span> </span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_bar</span>() <span class="sc">+</span> </span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">guides</span>(<span class="at">fill =</span> <span class="cn">FALSE</span>)     <span class="do">## removes legend for the bar colors</span></span></code></pre></div>
+<p>Below, we view the different <code>drug_groups</code> in the data and
+how prevalent they are.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## view proportions of the different drug types for each drug group</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>drugs <span class="sc">%&gt;%</span> </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">full_join</span>(drug_groups, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&#39;primary_key&#39;</span> <span class="ot">=</span> <span class="st">&#39;drugbank_id&#39;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(type, group) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> group, <span class="at">fill =</span> type)) <span class="sc">+</span> </span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_bar</span>() <span class="sc">+</span> </span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&#39;bottom&#39;</span>) <span class="sc">+</span> </span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&#39;Drug Group&#39;</span>, </span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">y =</span> <span class="st">&#39;Quantity&#39;</span>, </span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">title =</span> <span class="st">&quot;Drug Type Distribution per Drug Group&quot;</span>, </span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">caption =</span> <span class="st">&quot;created by ggplot&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_flip</span>()</span></code></pre></div>
+<p>Finally, we look at the <code>drug_targets_actions</code> to observe
+their proportions as well.</p>
 <p><img src="data:image/png;base64,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" /></p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="co">## get counts of the different target actions in the data</span></a>
-<a class="sourceLine" id="cb4-2" title="2">targetActionCounts &lt;-<span class="st"> </span></a>
-<a class="sourceLine" id="cb4-3" title="3"><span class="st">    </span>drug_targets_actions <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb4-4" title="4"><span class="st">    </span><span class="kw">group_by</span>(action) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb4-5" title="5"><span class="st">    </span><span class="kw">summarise</span>(<span class="dt">count =</span> <span class="kw">n</span>()) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb4-6" title="6"><span class="st">    </span><span class="kw">arrange</span>(<span class="kw">desc</span>(count))</a>
-<a class="sourceLine" id="cb4-7" title="7"></a>
-<a class="sourceLine" id="cb4-8" title="8"><span class="co">## get bar chart of the 10 most occurring target actions in the data</span></a>
-<a class="sourceLine" id="cb4-9" title="9">p &lt;-<span class="st"> </span></a>
-<a class="sourceLine" id="cb4-10" title="10"><span class="st">    </span><span class="kw">ggplot</span>(targetActionCounts[<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>,], </a>
-<a class="sourceLine" id="cb4-11" title="11">           <span class="kw">aes</span>(<span class="dt">x =</span> <span class="kw">reorder</span>(action,count), <span class="dt">y =</span> count, <span class="dt">fill =</span> letters[<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>])) <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb4-12" title="12"><span class="st">    </span><span class="kw">geom_bar</span>(<span class="dt">stat =</span> <span class="st">&#39;identity&#39;</span>) <span class="op">+</span></a>
-<a class="sourceLine" id="cb4-13" title="13"><span class="st">    </span><span class="kw">labs</span>(<span class="dt">fill =</span> <span class="st">&#39;action&#39;</span>, </a>
-<a class="sourceLine" id="cb4-14" title="14">         <span class="dt">x =</span> <span class="st">&#39;Target Action&#39;</span>, </a>
-<a class="sourceLine" id="cb4-15" title="15">         <span class="dt">y =</span> <span class="st">&#39;Quantity&#39;</span>, </a>
-<a class="sourceLine" id="cb4-16" title="16">         <span class="dt">title =</span> <span class="st">&#39;Target Actions Distribution&#39;</span>, </a>
-<a class="sourceLine" id="cb4-17" title="17">         <span class="dt">subtitle =</span> <span class="st">&#39;Distribution of Target Actions in the Data&#39;</span>,</a>
-<a class="sourceLine" id="cb4-18" title="18">         <span class="dt">caption =</span> <span class="st">&#39;created by ggplot&#39;</span>) <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb4-19" title="19"><span class="st">    </span><span class="kw">guides</span>(<span class="dt">fill =</span> <span class="ot">FALSE</span>) <span class="op">+</span><span class="st">    </span><span class="co">## removes legend for the bar colors</span></a>
-<a class="sourceLine" id="cb4-20" title="20"><span class="st">    </span><span class="kw">coord_flip</span>()              <span class="co">## switches the X and Y axes</span></a>
-<a class="sourceLine" id="cb4-21" title="21"></a>
-<a class="sourceLine" id="cb4-22" title="22"><span class="co">## display plot</span></a>
-<a class="sourceLine" id="cb4-23" title="23">p</a></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="do">## get counts of the different target actions in the data</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>targetActionCounts <span class="ot">&lt;-</span> </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    drug_targets_actions <span class="sc">%&gt;%</span> </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(action) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">count =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(<span class="fu">desc</span>(count))</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="do">## get bar chart of the 10 most occurring target actions in the data</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> </span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(targetActionCounts[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>,], </span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>           <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(action,count), <span class="at">y =</span> count, <span class="at">fill =</span> letters[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>])) <span class="sc">+</span> </span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">&#39;identity&#39;</span>) <span class="sc">+</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">fill =</span> <span class="st">&#39;action&#39;</span>, </span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>         <span class="at">x =</span> <span class="st">&#39;Target Action&#39;</span>, </span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>         <span class="at">y =</span> <span class="st">&#39;Quantity&#39;</span>, </span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>         <span class="at">title =</span> <span class="st">&#39;Target Actions Distribution&#39;</span>, </span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>         <span class="at">subtitle =</span> <span class="st">&#39;Distribution of Target Actions in the Data&#39;</span>,</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">caption =</span> <span class="st">&#39;created by ggplot&#39;</span>) <span class="sc">+</span> </span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">guides</span>(<span class="at">fill =</span> <span class="cn">FALSE</span>) <span class="sc">+</span>    <span class="do">## removes legend for the bar colors</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_flip</span>()              <span class="do">## switches the X and Y axes</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="do">## display plot</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>p</span></code></pre></div>
 <p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAArwAAAGwCAMAAAB8TkaXAAABoVBMVEUAAAAAADoAAGYAOjoAOmYAOpAAZpAAZrYAsPYAv30Av8QzMzM5tgA6AAA6ADo6AGY6OgA6Ojo6OmY6OpA6ZmY6ZpA6ZrY6kLY6kNtNTU1NTW5NTY5Nbo5NbqtNjqtNjshmAABmADpmAGZmOgBmOjpmOmZmOpBmZjpmZmZmkJBmkLZmkNtmtpBmtrZmtttmtv9uTU1uTW5uTY5ubk1ubo5ubqtujshuq6tuq+SOTU2OTW6OTY6Obk2Obm6ObquOjk2Ojo6Oq6uOyP+QOgCQOjqQOmaQZgCQZjqQZmaQkDqQkGaQkLaQtpCQttuQ27aQ2/+VkP+jpQCrbk2rbm6rbo6rjk2rq46ryKur5Mir5P+2ZgC2Zjq2Zma2kDq2tpC2ttu225C229u22/+2/9u2///Ijk3Ijm7I5KvI/8jI/+TI///YkADbkDrbkGbbtmbbtpDb25Db27bb29vb/7bb/9vb///kq27k5Kvk/8jk/+Tk///na/Pr6+v4dm3/Yrz/tmb/trb/yI7/25D/27b/29v/5Kv//7b//8j//9v//+T////mq0Q2AAAACXBIWXMAAA7DAAAOwwHHb6hkAAAcwElEQVR4nO2di38c113FV4rd5bVxaZsgOQlWYigppV3H1NSOAwlSeDQkEci0RYKWNFhxENsUaOSCeSzeVLI0fzX3Oa+d2cfs3PndI53zSTSzM/ObOffer67u3J35uZdQFKh60gYoqqkILwUrwkvBivBSsCK8FKwILwUrwkvBivBSsOoe3tOtntP6w4UCJr+bO27cG07vPdu5erzAiUb2sl/5WK0XQ7JL6O2nW/1qFwteh+pIAPCO8scd9PrTe5eDt6f5L4Zkl6iFd4nrUB1JZtiwFAV5eCeD31zbrd270InOfjoonaJ8klp4qbgkDe9nX+711r6pt/RHvfWPk88GvbXf39HwfHHT/IU/21Fd5YYPHK1/NLAf1IFXdt1eezodcOVjc/Iff9mcNDn7C3X2b2fBlr+xOp8Jcbv9SbSDn9iedzzwpzo23uZchxKRMLwj/3f8bOe5Qe/qsfvc132sXlnbLcCrsHKh4/xes23sAiyL7qR+lGAv5uDVh9v/7W5/Eu3gcwPvcwN/qml4K65DyUgW3rMd1dkqTvuahA0N59oHyRc7Pf1Z95g/U3vyf7D17drYDlkVPZ/pED8WVSf4tv5lMGv9Y7XWVyd+8dic3So90cH6Qx2S7bYn0aezY97ebx2f/ci4cPDOvg4lI+lhQ/LvP/7LgcFEkzU2fazmaWJHBxqZHLyKOjsidbuTDCrH6IHujXWAPmwyeO4bP8muOg2v321PondbeC2y9qgSvFXXoWQkDK8dHKR93MjcSmlYxm5iQG3I4HVHq8+TQX4sYKEyW8YaqpS4A334Cx/nDjVy8Ga7s6kEC6/9xSmcauZ1KBHJwqv+QH/tr/7x51sLwuvnujYWhTf52c3clFx5zJvtJryQkoXXkmDHvHpLftiQ3gel8Loo/Vd99rChANW//bm/pZqabUh3l+HtJ3bYYMYpdmQw9zpU55KGV93yfHGz53vCwg3bB4la1d2in5Ydu1kHA47aONFj05GbFMjfSHmoxurGKzn7kY9P53kdh9nuUW5mwdywKbr1DZsaWHxT38n1k5nXoWQkPdtgxwGehCSbKhv7EYLelkJrluOeH1YM7d7yFJaHyp3e3xyWv2HLdqcncfB+beBGG+YyV272Z1+HkpHwDZuZ8P/A30Al5ruHtT8wf7Ynatdz+guG05t6SirJ5rzMH3R9oN/7uQmeZF8eeKjMtxAv+okNC+/aC+mzDenu7CRuzKsI/aq5z/vpoPfC5/pUM69DiSjGp8rcDRNFzVZc8E4GX1L94QG/tKIWUVzwlgapFDVLccFbGqRS1CxFBi9FLS7CS8GK8FKwIrwUrAgvBSvCS8GK8FKwIrwUrLqH132LZp69eT57B/0L976D2pbf7PdNbStppJ/zSp9Sm/demb+Yjtso7ZhzpfLumohcKSuuSrUiCXg3kunMDXkAyjDMAzfRz/Kkj0MscHR2yNnO6/l8DAvEVpyqGt6pUi5/cmq2pODN46a1Iry5Q5Y6erz+0WBYtWNRzYa3UErC27bE4E1Gfdvy+tnuof65Mbn2vd76R3rY8J55OMe09uT5982+522ihL7fMvRn65l33LO/0I4Rc96NxJzz4elWb+39a+b1dvXJXMwefHDVPKybO03llaxJf/qcARfxnn/CPX1hLldKZ8Ve1dmi2pAcvOOrx358OxkMLcd9C8dAv+XQ9/Duut7NvhuhEdPvPlhI0m3lntd0eSMNat8+IHy6pZ94169EmOvaY/UO+3Ja30TUXMmbdKfPG7C+7Wd/+lIpUyvqUL/eWW1faAnCa5pzcs02pIVg6OAYZjduGbxj816O5nGY9q/ptjK8vzxOsnOZoxQyY/s65TA9euzeovcbaq7kTSZJwV/Ztz99qZSpFXWoXw9Yv5dI0j2vzp3gJx5SWK/lGMvBa97ByZh2JylPUPjVsXnTzHwyvaE6q3uJbSM9+qDv3tRcz/0KVVzpoDAqyRvI+/anL5WyYMWtB67jSyI5eA/8H3s1ILVdZ5vwnm6t7aY7Unh9qhN3tMu26rrkpB5eZ9IdUgtvbmohV8q8Fb8etIYvjURnGzKIhgV4K5YaKd1h+SGChze/zcp1cKbHc92dHwaM13Zzh/jBpxtx+x01V/LjgRnwjnM9aq6UeSt+PVz1XiaJzvP6caJapixPshs2fTulEzS4fYWbM8dO7Q2bBmQycPBmN2z61XV7wiR98dckgeznb9rKV/Im3enzBvK+/elLpfRWDMhuvdMav7AS+4bNpMbRfZEbAx70+llP+54bCA96vW+9uuv3pRNYuf4wv83Kraph6tqH/t5MT5W9ZzNB+osl6fyBzetkr1hzpdxAtQRv3nd6+mIpvRVzVb9OtaDL82zDmK91XjRdCnjHJr8Nk4NcNF0KeE2uHLJ74XQ54KUupAgvBSvCS8GK8FKwIrwUrAgvBavu4f3vWs3YtZhWPQG8AfgCLHYCwnsRDcAXgPCKxYsbgC8A4RWLFzcAXwDCKxYvbgC+ALjw/g9FZSK8FKwILwUrwkvBivBSsCK8FKwILwUrwkvBivBSsCK8FKwILwWr4PCe3D4qrunF4bZby/YSXmpZddjz5kC18Ba3EV5qSXXR857c+f7m5rZae9suVM/7jl379N7mS0fP9I/k5DtvvXREeKkl1Am8t+4mT1954hcaXrNww4ZDt9f0xr+uVH8y6dqiotJ8+lqAVxFaXOhhw+G2/fDs/lHy7M393ACCPS+1kDrpeafg/WQ/g1d/Pn9AeKmlJQOv6nnP99jzUqtJCN4bydSYl/BSS0oI3nc2r+/rD+d76WwD4aWWVHB4G4jwUguJ8FKwIrwUrAgvBSvCS8GK8FKwIrwUrAgvBSsseC9JmriI40EMEN6LaAC+AIRXLF7cAHwBcOH9lwugDpouYDyIAcIbRh00XcB4EAOEN4w6aLqA8SAGCG8YddB0AeNBDBDeMOqg6QLGgxggvGHUQdMFjAcxQHjDqIOmCxgPYoDwhlEHTRcwHsQA4Q2jDpouYDyIAcIbRh00XcB4EAOEN4w6aLqA8SAGWoK3Mg9k1e5srd6TNHhtqIOmCxgPYqAbeKsOrPckDV4b6qDpAsaDGGgO78ktk8DUJDY1GUXshkStv/zH+4lLMuLznh4lTzfTRKeEt42mCxgPYqAxvM/e3M8nNr195DaYvE7X99OUpunu+0fJ4xuu552d4lQavDa0bHVSK6jRsEEBmcvuZDdoSM8f7OcS67lMe4rthMOGFvudgPEgBlaA91CPA/Lw2g13nvhcpm7hE5jdcpnLCG87TRcwHsRAY3if3dsu5tVzG+p6Xh1TSBNZ70kavDbUQdMFjAcx0Bheg+UbOTrdhtKYN92tPhDeVpsuYDyIgcbwJo83N19+a9vRqZOY2g16muG3H6SzDbmEp3pQkegDCW8rTRcwHsRAc3hnaKFZ33pP0uC1oQ6aLmA8iIHW4T3f29Q3ZoQ3eNMFjAcx0Dq8C6vekzR4baiDpgsYD2KA8IZRB00XMB7EAOENow6aLmA8iAHCG0YdNF3AeBADhDeMOmi6gPEgBmKE95JUfcTxIAYI70U0AF8AwisWL24AvgC48P5NZApU9RHHgxggvPMVqOojjgcxQHjnK1DVRxwPYoDwzlegqo84HsQA4Z2vQFUfcTyIAcI7X4GqPuJ4EAOEd74CVX3E8SAGCO98Bar6iONBDBDe+QpU9RHHgxggvPMVqOojjgcxQHjnK1DVRxwPYqAbeJfLEikNa1mBqj7ieBAD3cBbhXG9J2lYywpU9RHHgxhoEd7WskRKw1pWoKqPOB7EQHvwtpclUhrWslauGiqs2hk2tJMlUhrWsgL1GxHHgxhoE962skRKw1pWoKqPOB7EQHvwtpclUhrWsgJVfcTxIAbag7e9LJHSsJYVqOojjgcx0B68SWtZIqVhLStQ1UccD2KgRXgzrZglUhrWsgJVfcTxIAZah7eFLJHSsJYVqOojjgcx0Dq8C6vekzSsZQWq+ojjQQwQ3vkKVPURx4MYILzzFajqI44HMUB45ytQ1UccD2KA8M5XoKqPOB7EAOGdr0BVH3E8iIEY4b0kVR9xPIgBwnsRDcAXgPCKxYsbgC8ALry/EZWCVX3E8SAGCO88Bav6iONBDBDeeQpW9RHHgxggvPMUrOojjgcxQHjnKVjVRxwPYoDwzlOwqo84HsQA4Z2nYFUfcTyIAcI7T8GqPuJ4EAOEd56CVX3E8SAGCO88Bav6iONBDBDeeQpW9RHHgxhoHd4sxUilzve2CW/08SAGQsA7azfhRYgHMRACXs2vS3Rq0566RKdm41uEN/54EAOh4LVJn1zaU5fo1GzUEM9JcSqNa1FtVQwVTC3D69Lt6Q1q1SV9Mhs5bACIBzEQCF6X6NSnPc3lijwkvPHHgxgIBK9PdGrTnrLnBYsHMVAJ72TQ01p/2BheN+Z1aU8dvNmYl/DGHQ9ioAres51+A2qL8LpEpzbtqYf3fI+zDRDxIAaq4D3dGjaHt4DxrN31nqRxLSpY1UccD2KgCt6znZXhXSDRab0naVyLClb1EceDGKiCNxk3Gu0uqXpP0rgWFazqI44HMVAF7+lWr/kNG+FdtOojjgcxUAVvN6r3JI1rUcGqPuJ4EAOEd56CVX3E8SAGquEd6VHDBuHVClb1EceDGKiEd6RHu6dbYemt9ySNa1HBqj7ieBADVfC6ed7Acw7SJQ8YL24AvgCEVyxe3AB8AXCHDZek6iOOBzFQCa/wDduvBlHbNRfyBNLxIAaq4e1C9Z4Ir3Q8iAHC27TmQp5AOh7EwBS86m5N+uthwisdD2JgCt7OVO+J8ErHgxiogld6qozwSseDGCC8TWsu5Amk40EMTMM76nmt8DIQ4YWOBzEwDW9rrwERXth4EANV8Hajek+EVzoexEAlvGc7G6u9Qkx4seNBDFTCe9BPGr8AbzPiFN8czjKNEF6IeBADVfCuNNtwWMEp4QWLBzHQPrzvmKSmOl1ZIa+pWrx0lJx85y31k/BGHg9ioArelR6JPHzlicu1V8xrqhaPbyQnt0wfPDvFaRh4mxSGglBxtmHc/JFIPWw43J7Krqcz9bpkp071v1Bh4G371z7kCaTjQQxUw7uCPtkvwuvymqpRg86hQ3gh4kEMzIL3HxresKmOdrrnvW+oJbwQ8SAGauE93Wr2SOThDZ9fupjX9NCMgAkvRDyIgRp49QMOzb4jPnxHZ9jLwevymqpxg91OeOOPBzFQBa95GD3w92uEN+Z4EAPT8KpOd23XfslGeBtKuu3hC9D8NSC9ILyrSLrt4QvQtOcdm+Eu4V1F0m0PX4DmY96zHY55V5N028MXYKXZhnHj2QbC28IJpONBDNTAa7pfvsPWVNJtD1+A1b9h+z/C21DSbQ9fANzXgC5J1UccD2KA8F5EA/AFILxi8eIG4Asg9CZFC/D+2mpCqfqI40EMEN6mNRfyBNLxIAam4ZXPmEN4peNBDEzDK58xh/BKx4MYqIK3G9V7IrzS8SAGquFVQ4fh6Oox4RU6gXQ8iIFKeA+u/nxrGDrfU70nwisdD2KgCl6T2X/I2Qa5E0jHgxggvE1rLuQJpONBDFTBm4z0sEHuHxEkvNLxIAYq4V0lY47W+d7m3fznYs5Iwht9PIiBanhXVBlWwgsWD2KgNXhtXgaTC9KsntzyOSKv/53buGiWSMIrHQ9ioApe/48ILvMFsU7B+/SVJ2leHJ1YTy3s5l+4xDlqzyJZIleEd5lfOeoiqDLF6RJTvXZkoDOSKWzdMCHNCulSlmV7tOp/odjzSseDGKiCN3uqbPHZspM7TxzC5w8sooebapyQbs7vIbyxx4MYaA3eUs/77N52muCUPS9aPIiBKnizzOiLP9+gB7eKzHTMa9LsvbFvNz/KxryEFyEexEAlvHaed5iM1nYXZLcw22C64cebWXLI8710toHwIsSDGKiGtwvVeyK80vEgBqrgPdvhw+iyJ5COBzFQBS/fpFgxXtwAfAFWejAn7HPohDfyeBADVfD6b9j4SKTUCaTjQQxUwduN6j0RXul4EAOEt2nNhTyBdDyIgUp4JwMOG0RPIB0PYqAK3rOdjbOdYeg5B+mSB4wXNwBfgNWmyg42knHYOQfpkgeMFzcAX4DV4B315V7AvCRVH3E8iIEqePU/BaTIDTzbW+/pVxbXCiWfVSkrxosbgC/ACvCqQW9y0FviqRzCG5cB+ALgTpURXul4EANT8HbzYAPhjToexADhDRAvbgC+AIS3seDbHr4AhLex4NsevgCN4U3T+kvN8xJe6XgQAxXwsueFb3v4AhDexoJve/gCEN7Ggm97+AKIwZvmGslvIbxI8SAGpuBdXdOoEl6weBADLcFbSmj66PajO09MbjK9/dmSKU4Jr3Q8iIF24C0nND25/c8P1JY7/2G3nyyX4nQJeFdyTV0QrT5syCc0Vf89vps8vpttXybRHnte6XgQA23BO5XQ9OTOf6rO121fLsUp4ZWOBzHQDrzlhKZ6CPHgh3eeZNvZ8yLFgxhoB95yQlObJvKu336yXIpTwisdD2KgHXjLCU0fWWj99iVTnBJe6XgQAy3B20D1ngivdDyIAcIbIF7cAHwBCG9jwbc9fAEIb2PBtz18AQhvY8G3PXwBCG9jwbc9fAEIb2PBtz18AQhvY8G3PXwBcOG9JFUfcTyIAcJ7EQ3AF4DwisWLG4AvAC68f72YViz5rEpZMV7cAHwBCG9jwbc9fAEIb2PBtz18AQhvY8G3PXwBCG9jwbc9fAEIb2PBtz18AQhvY8G3PXwBCG9jwbc9fAEIb2PBtz18AQhvY8G3PXwBCG9jwbc9fAFahnc6canWuc6KM+Mz4YWMBzGwIrw2wRPhjcwAfAFagzfNUPro9ts+kanPVvr0hkmKo1OTfV/vU/Ce773yC/vBHmjS6Lyxr9NHus2EN/Z4EAMLwJsmajq5Zdb0hsc3EpOt9HDbw2v3KXjV3tyBaqHzRSpmH9/1m+elOF0Q3gV7eOrCqx7eLEWe41Qn43X5TF3ex2zf+YM/vOtSl2XJ9e48+eQHN7JD3Xnrf6HY80rHgxiYD28GqWfy3ubm5nWL4p0nJXj3vvsnT5LcNhX57P6n9x/d/vT+EeFFiQcx0KTnvX/koX56Iyn3vPuP75Z63uTwT//o/MEP0kMJb/TxIAbmw5sb8zr4smylh9uGzscv5eDNjQ/sgcnTTTvqJbwo8SAGFoDXTi74xKXqf5PI1KFqsph+934OXpuh1x+o//kUM9fg8psSXoR4EAMLwBtI9Z4Ir3Q8iAHCGyBe3AB8AQhvY8G3PXwBCG9jwbc9fAEIb2PBtz18AQhvY8G3PXwBCG9jwbc9fAEIb2PBtz18AXDhvSRVH3E8iAHCexENwBeA8IrFixuALwAuvP81U22VPGC8uAH4AhDexoJve/gCEN7Ggm97+AIQ3saCb3v4AhDexoJve/gCEN7Ggm97+AIQ3saCb3v4AhDexoJve/gCEN7Ggm97+AIQ3saCb3v4AhDexoJve/gCdA1vMYekTq9HeFHjQQy0B29RhBc5HsRAe/BmeU51spGX3/L5I12OklxeVMIbezyIgXbhzaU23fTw6j5YbczlRZ2X4nQ2vCsbpS6a2oE3S7CnkM2l4EuSXF5Up/pfKPa80vEgBkLAawjN0k6bzP+5vKiEN/p4EAMh4K3sebO8qIQ3+ngQAyHgdWNel/zU/JsUt4+yvKiEN/p4EANB4D3f07MNLvlpNttg86IS3vjjQQy0B++yqvdEeKXjQQwQ3gDx4gbgC0B4Gwu+7eELQHgbC77t4QtAeBsLvu3hC0B4Gwu+7eELQHgbC77t4QuAC+8lqfqI40EMEN6LaAC+AIRXLF7cAHwBcOH93xq1W/KA8eIG4AtAeBsLvu3hC0B4Gwu+7eELQHgbC77t4QtAeBsLvu3hC0B4Gwu+7eELQHgbC77t4QtAeBsLvu3hC0B4Gwu+7eELQHgbC77t4QtAeBsLvu3hCxADvGnaBsILFQ9igPAGiBc3AF8AWXhNUkj949Htt33myEWzRBJe6XgQA6HgTRPk5DJHLpolsg7eli1SF0Utw6tTkz17cz+Xv2yJLJHseaXjQQwEgtckfXqQh3eJLJGEVzoexEAgeKd73iWyRBJe6XgQA4HgzY15c5kjF8wSSXil40EMhILXTi6c7730qPAvUxBeiHgQA6Hgna96T4RXOh7EAOENEC9uAL4AhLex4NsevgCEt7Hg2x6+AIS3seDbHr4AhLex4NsevgCEt7Hg2x6+AIS3seDbHr4AuPBekqqPOB7EAOG9iAbgC0B4xeLFDcAXgPCKxYsbgC8A4RWLFzcAX4DY4a3XjDeEaIAGpkV4aQDWAOGlAVgDMcFLUUuJ8FKwIrwUrAgvBSvCS8EqGnif3dt85YnIlU9umaRqjzc39YvPAj6KV+7egL6+rgKxGjDvlheLv5CJWOA939vWOc0EpBNSnbyxnxxuS/koXFmoIkxaOaEaeGqzJeSLv5iJWODVmXVqs6IG1VNdR4fb5w/2hXwUryxTEfo3WKoGDq//UOf3KBR/MROxwHty54mpQRmpK5ukatsSPopXlqkI3cvJ1YDJrlQo/mImYoFX/9kSg/d8764ZOai+R8BH8coiFWEuKFgDCt5i8RczEQu8kj3vs3t33drhtpSP9MoiBp6mN0ciNYDe88qNeX3ia63DbSkf6ZVFDBzeTdckauAEfMyr/3LLzDY4dnXnc/63RwI+ileWqAh7qyZXAyarc6H4i5mIBV65ed7cLOf1fREfxSsLGHB/oMVqAH2el6KWFuGlYEV4KVgRXgpWhJeCFeGlYEV4KVgRXjmNekrDWUd88XEyeX5XL6gKEV4pne1cPU6SyaBff4gGN1tQZRFeKR1odpPkdKu+7yW8s0V4hZRCO7p6bOjUPyYDNZDYUKvvq5Wh/rRh1zcOdAc9mtFLX0YRXiGN1x/alcm1hx5eA/Ro/eFkoHplvdQ8P7+rF/rws52ZA+TLJ8IrpAxeS6de/vLYfR4M0+1uoblWmItajk6EV0hV8Kqtatiwln7OwauHDBw1lER4hZSNeddzw4a13TzMeXgn1/6Jo4aSCK+U9GzD2U7/dKufeFjHegJiXN3znu18g6OGkgivlM52zD1YT/083dpQa2u7Y93xDjJ4zUDX3cclox5HDSURXjnpAa6SoldPin3r1d3kQI14P9wapmPgg17fLfTXGRw1lER4xTVaDErONUyJ8KJotCHtIDoRXgyZ7y2ooggvBSvCS8GK8FKwIrwUrAgvBSvCS8GK8FKwIrwUrAgv1aWKX3K7d0MO5n9BnsXlzkB4qS5FeKn4dbqlXwn5ys31h2pNvzWin5wbmnW3QS2u3LTwvq7zVyiEJ189tqFXfmfXLU5f+15PPyl6TT85mgUbEV4qhHSfOr76r/oxzoMN/QLT6auGQA2h3aAXY5tz5eDqsdo+Vp/Nw0d6h+LVLk63rh6P133c2BzpL0J4qRCyiJn+UlF7+poBTi3UFrdBb8sNGw6Gp18//vtde1Ry9u6uX2wN9ULHvWZORnipwLIDAPfHXr9Umugn7U0P6jYYCO1oVzN7MDx798OvH7tQjatdaNTVTtdpW4z9RQgvFUK5ntf1uvbdfdeDJq6DTXtevTZ6fSPdkfW8Cl72vFSX0jBOrn1ketd0qKpfJk3Hrvkxbz9xu01saczb9+Ec81LdyM42XHvo1kxOzCs3h/q1U7fhbCc322A2/NlDH/qld3fd4vTV3yvMNtgXV60ILxWLJi9mq7Z7dbd3dSK8VCQarVlMVY+s+1q3ILzUhRThpWBFeClYEV4KVoSXghXhpWBFeClY/T+8v9qZiomAlwAAAABJRU5ErkJggg==" /></p>
 </div>
 

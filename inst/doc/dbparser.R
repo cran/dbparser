@@ -14,16 +14,16 @@ knitr::opts_chunk$set(
 #  library(XML)
 #  
 #  ## parse data from XML and save it to memory
-#  read_drugbank_xml_db("C:\drugbank.xml")
+#  dvobj <- parseDrugBank("C:\drugbank.xml")
 #  
 #  ## load drugs data
-#  drugs <- drug()
+#  drugs <- dvobj$drugs$general_information
 #  
 #  ## load drug groups data
-#  drug_groups <- drug_groups()
+#  drug_groups <- dvobj$drugs$groups
 #  
 #  ## load drug targets actions data
-#  drug_targets_actions <- targets_actions()
+#  drug_targets_actions <- dvobj$cett$targets$actions
 
 ## ----eval=FALSE---------------------------------------------------------------
 #  ## view proportions of the different drug types (biotech vs. small molecule)

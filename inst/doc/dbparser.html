@@ -12,7 +12,7 @@
 
 <meta name="author" content="Mohammed Ali, Ali Ezzat" />
 
-<meta name="date" content="2023-03-17" />
+<meta name="date" content="2023-03-27" />
 
 <title>DrugBank Database XML Parser</title>
 
@@ -340,7 +340,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">DrugBank Database XML Parser</h1>
 <h4 class="author">Mohammed Ali, Ali Ezzat</h4>
-<h4 class="date">2023-03-17</h4>
+<h4 class="date">2023-03-27</h4>
 
 
 
@@ -376,16 +376,21 @@ info.</p>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(XML)</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="do">## parse data from XML and save it to memory</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>dvobj <span class="ot">&lt;-</span> <span class="fu">parseDrugBank</span>(<span class="st">&quot;C:\drugbank.xml&quot;</span>)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="do">## load drugs data</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>drugs <span class="ot">&lt;-</span> dvobj<span class="sc">$</span>drugs<span class="sc">$</span>general_information</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="do">## load drug groups data</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>drug_groups <span class="ot">&lt;-</span> dvobj<span class="sc">$</span>drugs<span class="sc">$</span>groups</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="do">## load drug targets actions data</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>drug_targets_actions <span class="ot">&lt;-</span> dvobj<span class="sc">$</span>cett<span class="sc">$</span>targets<span class="sc">$</span>actions</span></code></pre></div>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>dvobj <span class="ot">&lt;-</span> <span class="fu">parseDrugBank</span>(<span class="at">db_path            =</span> <span class="st">&quot;C:\drugbank.xml&quot;</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>                       <span class="at">drug_options       =</span> <span class="fu">drug_node_options</span>(),</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>                       <span class="at">parse_salts        =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>                       <span class="at">parse_products     =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>                       <span class="at">references_options =</span> <span class="fu">references_node_options</span>(),</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>                       <span class="at">cett_options       =</span> <span class="fu">cett_nodes_options</span>())</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="do">## load drugs data</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>drugs <span class="ot">&lt;-</span> dvobj<span class="sc">$</span>drugs<span class="sc">$</span>general_information</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="do">## load drug groups data</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>drug_groups <span class="ot">&lt;-</span> dvobj<span class="sc">$</span>drugs<span class="sc">$</span>groups</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="do">## load drug targets actions data</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>drug_targets_actions <span class="ot">&lt;-</span> dvobj<span class="sc">$</span>cett<span class="sc">$</span>targets<span class="sc">$</span>actions</span></code></pre></div>
 </div>
 <div id="exploring-the-data" class="section level2">
 <h2>Exploring the data</h2>

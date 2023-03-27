@@ -29,6 +29,18 @@ test_that(
                                   biotech,
                                   package = "dbparser"))
     expect_snapshot(dvobj$result)
+
+    dvobj <- q_parser(system.file("extdata",
+                                  biotech,
+                                  package = "dbparser"),
+                      drug_options = NULL)
+    expect_equal(length(dvobj$result), 1)
+
+    dvobj <- q_parser(system.file("extdata",
+                                  biotech,
+                                  package = "dbparser"),
+                      drug_options = NA)
+    expect_equal(length(dvobj$result), 1)
   }
 )
 
@@ -39,74 +51,28 @@ test_that(
     dvobj <- q_parser(system.file("extdata",
                                   biotech,
                                   package = "dbparser"),
-                      drug_options = NULL)
-    expect_true(grepl("'drug_options' cannot be empty", dvobj$messages[1]))
-
-    expect_equal(length(dvobj$result), 5)
-
-    dvobj <- q_parser(system.file("extdata",
-                                  biotech,
-                                  package = "dbparser"),
-                      drug_options = NA)
-    expect_true(grepl("'drug_options' cannot be empty",
-                      dvobj$messages[1]))
-    expect_equal(length(dvobj$result), 5)
-
-    dvobj <- q_parser(system.file("extdata",
-                                  biotech,
-                                  package = "dbparser"),
                       drug_options = c("a", "b"))
-    expect_true(grepl("Options: ' a, b ' are invalid",
+    expect_true(grepl("Options: ' a, b ' are invalid, setting 'drug_options' to default value",
                       dvobj$messages[1]))
+    expect_equal(length(dvobj$result), 1)
 
     ######## ref options
     dvobj <- q_parser(system.file("extdata",
                                   biotech,
                                   package = "dbparser"),
-                      references_options = NULL)
-    expect_true(grepl("'references_options' cannot be empty",
-                      dvobj$messages[1]))
-
-    expect_equal(length(dvobj$result), 5)
-
-    dvobj <- q_parser(system.file("extdata",
-                                  biotech,
-                                  package = "dbparser"),
-                      references_options = NA)
-    expect_true(grepl("'references_options' cannot be empty",
-                      dvobj$messages[1]))
-    expect_equal(length(dvobj$result), 5)
-
-    dvobj <- q_parser(system.file("extdata",
-                                  biotech,
-                                  package = "dbparser"),
                       references_options = c("a", "b"))
-    expect_true(grepl("Options: ' a, b ' are invalid",
+    expect_true(grepl("Options: ' a, b ' are invalid, setting 'references_options' to default value",
                       dvobj$messages[1]))
+    expect_equal(length(dvobj$result), 1)
 
     ####### cett options
     dvobj <- q_parser(system.file("extdata",
                                   biotech,
                                   package = "dbparser"),
-                      cett_options = NULL)
-    expect_true(grepl("'cett_options' cannot be empty", dvobj$messages[1]))
-
-    expect_equal(length(dvobj$result), 5)
-
-    dvobj <- q_parser(system.file("extdata",
-                                  biotech,
-                                  package = "dbparser"),
-                      cett_options = NA)
-    expect_true(grepl("'cett_options' cannot be empty",
-                      dvobj$messages[1]))
-    expect_equal(length(dvobj$result), 5)
-
-    dvobj <- q_parser(system.file("extdata",
-                                  biotech,
-                                  package = "dbparser"),
                       cett_options = c("a", "b"))
-    expect_true(grepl("Options: ' a, b ' are invalid",
+    expect_true(grepl("Options: ' a, b ' are invalid, setting 'cett_options' to default value",
                       dvobj$messages[1]))
+    expect_equal(length(dvobj$result), 1)
 
     ####### parse_products options
     dvobj <- q_parser(system.file("extdata",
@@ -115,7 +81,7 @@ test_that(
                       parse_products = NULL)
     expect_true(grepl("'parse_products' must have single logical value", dvobj$messages[1]))
 
-    expect_equal(length(dvobj$result), 5)
+    expect_equal(length(dvobj$result), 1)
 
     dvobj <- q_parser(system.file("extdata",
                                   biotech,
@@ -123,37 +89,37 @@ test_that(
                       parse_products = NA)
     expect_true(grepl("'parse_products' must have single logical value",
                       dvobj$messages[1]))
-    expect_equal(length(dvobj$result), 5)
+    expect_equal(length(dvobj$result), 1)
 
     dvobj <- q_parser(system.file("extdata",
                                   biotech,
                                   package = "dbparser"),
                       parse_products = c("a", "b"))
-    expect_equal(length(dvobj$result), 5)
+    expect_equal(length(dvobj$result), 1)
 
     expect_true(grepl("'parse_products' must have single logical value",
                       dvobj$messages[1]))
-    expect_equal(length(dvobj$result), 5)
+    expect_equal(length(dvobj$result), 1)
 
     dvobj <- q_parser(system.file("extdata",
                                   biotech,
                                   package = "dbparser"),
                       parse_products = c(1, 3))
-    expect_equal(length(dvobj$result), 5)
+    expect_equal(length(dvobj$result), 1)
 
     expect_true(grepl("'parse_products' must have single logical value",
                       dvobj$messages[1]))
-    expect_equal(length(dvobj$result), 5)
+    expect_equal(length(dvobj$result), 1)
 
     dvobj <- q_parser(system.file("extdata",
                                   biotech,
                                   package = "dbparser"),
                       parse_products = "c")
-    expect_equal(length(dvobj$result), 5)
+    expect_equal(length(dvobj$result), 1)
 
     expect_true(grepl("'parse_products' must have single logical value",
                       dvobj$messages[1]))
-    expect_equal(length(dvobj$result), 5)
+    expect_equal(length(dvobj$result), 1)
 
     dvobj <- q_parser(system.file("extdata",
                                   biotech,
@@ -161,7 +127,7 @@ test_that(
                       parse_products = 1)
     expect_true(grepl("'parse_products' must have single logical value",
                       dvobj$messages[1]))
-    expect_equal(length(dvobj$result), 5)
+    expect_equal(length(dvobj$result), 1)
 
     ####### parse_products options
     dvobj <- q_parser(system.file("extdata",
@@ -170,7 +136,7 @@ test_that(
                       parse_products = NULL)
     expect_true(grepl("'parse_products' must have single logical value", dvobj$messages[1]))
 
-    expect_equal(length(dvobj$result), 5)
+    expect_equal(length(dvobj$result), 1)
 
     dvobj <- q_parser(system.file("extdata",
                                   biotech,
@@ -178,37 +144,37 @@ test_that(
                       parse_products = NA)
     expect_true(grepl("'parse_products' must have single logical value",
                       dvobj$messages[1]))
-    expect_equal(length(dvobj$result), 5)
+    expect_equal(length(dvobj$result), 1)
 
     dvobj <- q_parser(system.file("extdata",
                                   biotech,
                                   package = "dbparser"),
                       parse_products = c("a", "b"))
-    expect_equal(length(dvobj$result), 5)
+    expect_equal(length(dvobj$result), 1)
 
     expect_true(grepl("'parse_products' must have single logical value",
                       dvobj$messages[1]))
-    expect_equal(length(dvobj$result), 5)
+    expect_equal(length(dvobj$result), 1)
 
     dvobj <- q_parser(system.file("extdata",
                                   biotech,
                                   package = "dbparser"),
                       parse_products = c(1, 3))
-    expect_equal(length(dvobj$result), 5)
+    expect_equal(length(dvobj$result), 1)
 
     expect_true(grepl("'parse_products' must have single logical value",
                       dvobj$messages[1]))
-    expect_equal(length(dvobj$result), 5)
+    expect_equal(length(dvobj$result), 1)
 
     dvobj <- q_parser(system.file("extdata",
                                   biotech,
                                   package = "dbparser"),
                       parse_products = "c")
-    expect_equal(length(dvobj$result), 5)
+    expect_equal(length(dvobj$result), 1)
 
     expect_true(grepl("'parse_products' must have single logical value",
                       dvobj$messages[1]))
-    expect_equal(length(dvobj$result), 5)
+    expect_equal(length(dvobj$result), 1)
 
     dvobj <- q_parser(system.file("extdata",
                                   biotech,
@@ -216,20 +182,20 @@ test_that(
                       parse_products = 1)
     expect_true(grepl("'parse_products' must have single logical value",
                       dvobj$messages[1]))
-    expect_equal(length(dvobj$result), 5)
+    expect_equal(length(dvobj$result), 1)
 
     #test all invalid
     dvobj <- q_parser(system.file("extdata",
                                   biotech,
                                   package = "dbparser"),
-                      drug_options       = NULL,
-                      references_options = NULL,
+                      drug_options       = c("a", "b"),
+                      references_options = c("a", "b"),
                       cett_options       = c("a", "b"),
                       parse_salts        = 2,
-                      parse_products     = NULL)
-    expect_true(grepl("'drug_options' cannot be empty",
+                      parse_products     = c("a", "b"))
+    expect_true(grepl("Options: ' a, b ' are invalid",
                       dvobj$messages[1]))
-    expect_true(grepl("'references_options' cannot be empty",
+    expect_true(grepl("Options: ' a, b ' are invalid",
                       dvobj$messages[2]))
     expect_true(grepl("Options: ' a, b ' are invalid",
                       dvobj$messages[3]))
@@ -238,7 +204,7 @@ test_that(
     expect_true(grepl("'parse_products' must have single logical value",
                       dvobj$messages[5]))
 
-    expect_equal(length(dvobj$result), 5)
+    expect_equal(length(dvobj$result), 1)
   }
 )
 
@@ -299,9 +265,8 @@ test_that(
                                   package = "dbparser"),
                       parse_salts    = FALSE,
                       parse_products = FALSE)
-    expect_equal(length(dvobj$result), 3)
-    expect_equal(names(dvobj$result),
-                 c("drugs", "references", "cett" ))
+    expect_equal(length(dvobj$result), 1)
+    expect_equal(names(dvobj$result), "drugs")
   }
 )
 
@@ -313,14 +278,19 @@ test_that(
     small_molecule <- "drugbank_record_small_molecule.xml"
     dvobj          <- q_parser(system.file("extdata",
                                            small_molecule,
-                                           package = "dbparser"))
+                                           package = "dbparser"),
+                               drug_options       = drug_node_options(),
+                               parse_salts        = TRUE,
+                               parse_products     = TRUE,
+                               references_options = references_node_options(),
+                               cett_options       = cett_nodes_options())
     expect_snapshot(dvobj$result)
   }
 )
 
 
 test_that(
-  desc = "parse DrugBank DB - zim file",
+  desc = "parse DrugBank DB - zip file",
   code = {
     local_edition(3)
     small_molecule <- "drugbank_record.zip"

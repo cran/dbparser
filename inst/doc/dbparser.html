@@ -12,7 +12,7 @@
 
 <meta name="author" content="Mohammed Ali" />
 
-<meta name="date" content="2024-02-16" />
+<meta name="date" content="2024-04-20" />
 
 <title>DrugBank Database XML Parser</title>
 
@@ -8166,7 +8166,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">DrugBank Database XML Parser</h1>
 <h4 class="author">Mohammed Ali</h4>
-<h4 class="date">2024-02-16</h4>
+<h4 class="date">2024-04-20</h4>
 
 
 
@@ -8203,17 +8203,16 @@ info.</p>
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  <span class="fu">library</span>(tibble)</span>
 <span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>  <span class="fu">library</span>(dbparser)</span>
 <span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>})</span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt; Warning: package &#39;canvasXpress&#39; was built under R version 4.3.2</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a></span>
 <span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="do">## load drugs data</span></span>
-<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>drugs <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">system.file</span>(<span class="st">&quot;drugs.RDS&quot;</span>, <span class="at">package =</span> <span class="st">&quot;dbparser&quot;</span>))</span>
-<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a></span>
-<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="do">## load drug groups data</span></span>
-<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>drug_groups <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">system.file</span>(<span class="st">&quot;drug_groups.RDS&quot;</span>, <span class="at">package =</span> <span class="st">&quot;dbparser&quot;</span>))</span>
-<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="do">## load drug targets actions data</span></span>
-<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a>drug_targets_actions <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">system.file</span>(<span class="st">&quot;targets_actions.RDS&quot;</span>, <span class="at">package =</span> <span class="st">&quot;dbparser&quot;</span>))</span></code></pre></div>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="do">## load drugs data</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>drugs <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">system.file</span>(<span class="st">&quot;drugs.RDS&quot;</span>, <span class="at">package =</span> <span class="st">&quot;dbparser&quot;</span>))</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="do">## load drug groups data</span></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>drug_groups <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">system.file</span>(<span class="st">&quot;drug_groups.RDS&quot;</span>, <span class="at">package =</span> <span class="st">&quot;dbparser&quot;</span>))</span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="do">## load drug targets actions data</span></span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a>drug_targets_actions <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">system.file</span>(<span class="st">&quot;targets_actions.RDS&quot;</span>, <span class="at">package =</span> <span class="st">&quot;dbparser&quot;</span>))</span></code></pre></div>
 </div>
 <div id="exploring-the-data" class="section level2">
 <h2>Exploring the data</h2>
@@ -8236,8 +8235,8 @@ data.</p>
 <span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>  <span class="at">title            =</span><span class="st">&quot;Drugs Type Distribution&quot;</span>,</span>
 <span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>  <span class="at">xAxisTitle       =</span> <span class="st">&quot;Count&quot;</span></span>
 <span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>)</span></code></pre></div>
-<div id="htmlwidget-c568b736dd887d0436e2" style="width:600px;height:400px;" class="canvasXpress html-widget "></div>
-<script type="application/json" data-for="htmlwidget-c568b736dd887d0436e2">{"x":{"data":{"y":{"vars":["biotech","small molecule"],"smps":["count"],"data":[[3880],[12695]]},"x":null,"z":null},"config":{"graphType":"Bar","isR":true,"graphOrientation":"vertical","showSampleNames":false,"title":"Drugs Type Distribution","xAxisTitle":"Count"},"events":null,"afterRender":null},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-3d8e2422ee16451e0c59" style="width:600px;height:400px;" class="canvasXpress html-widget "></div>
+<script type="application/json" data-for="htmlwidget-3d8e2422ee16451e0c59">{"x":{"data":{"y":{"vars":["biotech","small molecule"],"smps":["count"],"data":[[3880],[12695]]},"x":null,"z":null},"config":{"graphType":"Bar","isR":true,"graphOrientation":"vertical","showSampleNames":false,"title":"Drugs Type Distribution","xAxisTitle":"Count"},"events":null,"afterRender":null},"evals":[],"jsHooks":[]}</script>
 <p>Below, we view the different <code>drug_groups</code> in the data and
 how prevalent they are.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="do">## view proportions of the different drug types for each drug group</span></span>
@@ -8261,8 +8260,8 @@ how prevalent they are.</p>
 <span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>  <span class="at">xAxis2Show     =</span> <span class="cn">TRUE</span>,</span>
 <span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>  <span class="at">xAxisShow      =</span> <span class="cn">FALSE</span>,</span>
 <span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>  <span class="at">smpTitle      =</span> <span class="st">&quot;Drug Group&quot;</span>)</span></code></pre></div>
-<div id="htmlwidget-924e0f458d309730d5fe" style="width:600px;height:400px;" class="canvasXpress html-widget "></div>
-<script type="application/json" data-for="htmlwidget-924e0f458d309730d5fe">{"x":{"data":{"y":{"vars":["biotech","small molecule"],"smps":["approved","experimental","investigational","nutraceutical","vet_approved","withdrawn","illicit"],"data":[[1613,375,2395,17,8,31,null],[2761,6348,4850,118,419,286,205]]},"x":null,"z":null},"config":{"graphType":"Stacked","isR":true,"legendColumns":2,"legendPosition":"bottom","title":"Drug Type Distribution per Drug Group","xAxisTitle":"Quantity","xAxis2Show":true,"xAxisShow":false,"smpTitle":"Drug Group"},"events":null,"afterRender":null},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-abbcf35ad2593058c864" style="width:600px;height:400px;" class="canvasXpress html-widget "></div>
+<script type="application/json" data-for="htmlwidget-abbcf35ad2593058c864">{"x":{"data":{"y":{"vars":["biotech","small molecule"],"smps":["approved","experimental","investigational","nutraceutical","vet_approved","withdrawn","illicit"],"data":[[1613,375,2395,17,8,31,null],[2761,6348,4850,118,419,286,205]]},"x":null,"z":null},"config":{"graphType":"Stacked","isR":true,"legendColumns":2,"legendPosition":"bottom","title":"Drug Type Distribution per Drug Group","xAxisTitle":"Quantity","xAxis2Show":true,"xAxisShow":false,"smpTitle":"Drug Group"},"events":null,"afterRender":null},"evals":[],"jsHooks":[]}</script>
 <p>Finally, we look at the <code>drug_targets_actions</code> to observe
 their proportions as well.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="do">## get counts of the different target actions in the data</span></span>
@@ -8285,8 +8284,8 @@ their proportions as well.</p>
 <span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>  <span class="at">showSampleNames =</span> <span class="cn">FALSE</span>,</span>
 <span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>  <span class="at">xAxis2Show      =</span> <span class="cn">TRUE</span>,</span>
 <span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>  <span class="at">xAxisShow       =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
-<div id="htmlwidget-c19c5793f02fe48864a1" style="width:600px;height:400px;" class="canvasXpress html-widget "></div>
-<script type="application/json" data-for="htmlwidget-c19c5793f02fe48864a1">{"x":{"data":{"y":{"vars":["inhibitor","antagonist","ligand","binder","agonist","cofactor","activator","substrate","inducer","antibody"],"smps":["count"],"data":[[1229],[375],[353],[298],[296],[156],[122],[107],[105],[80]]},"x":null,"z":null},"config":{"graphType":"Bar","isR":true,"legendColumns":2,"legendPosition":"bottom","title":"Target Actions Distribution","showSampleNames":false,"xAxis2Show":true,"xAxisShow":false},"events":null,"afterRender":null},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-136385cfd4fc766193cf" style="width:600px;height:400px;" class="canvasXpress html-widget "></div>
+<script type="application/json" data-for="htmlwidget-136385cfd4fc766193cf">{"x":{"data":{"y":{"vars":["inhibitor","antagonist","ligand","binder","agonist","cofactor","activator","substrate","inducer","antibody"],"smps":["count"],"data":[[1229],[375],[353],[298],[296],[156],[122],[107],[105],[80]]},"x":null,"z":null},"config":{"graphType":"Bar","isR":true,"legendColumns":2,"legendPosition":"bottom","title":"Target Actions Distribution","showSampleNames":false,"xAxis2Show":true,"xAxisShow":false},"events":null,"afterRender":null},"evals":[],"jsHooks":[]}</script>
 </div>
 
 

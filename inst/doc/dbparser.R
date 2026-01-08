@@ -3,85 +3,80 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.path = "docs/articles/",
-  out.width = "100%"
+  out.width = "100%",
+  warning = FALSE,
+  message = FALSE
 )
 
-## ----eval=T-------------------------------------------------------------------
-## load dbparser package
+## ----load_data----------------------------------------------------------------
 suppressPackageStartupMessages({
   library(tidyr)
   library(dplyr)
-  library(canvasXpress)
   library(tibble)
+  library(canvasXpress)
   library(dbparser)
 })
 
-
-## load drugs data
+# Load sample tables representing parts of the parsed dvobject
 drugs <- readRDS(system.file("drugs.RDS", package = "dbparser"))
-
-## load drug groups data
 drug_groups <- readRDS(system.file("drug_groups.RDS", package = "dbparser"))
-
-## load drug targets actions data
 drug_targets_actions <- readRDS(system.file("targets_actions.RDS", package = "dbparser"))
 
-## ----eval=T-------------------------------------------------------------------
-## view proportions of the different drug types (biotech vs. small molecule)
+## ----analysis_type------------------------------------------------------------
+# Prepare data: Count drugs by type
 type_stat <- drugs %>% 
-  select(type) %>% 
   group_by(type) %>% 
-  summarise(count = n()) %>% 
+  summarise(Count = n()) %>% 
+  arrange(desc(Count)) %>% 
   column_to_rownames("type")
 
+# Visualize
 canvasXpress(
   data             = type_stat,
-  graphOrientation = "vertical",
   graphType        = "Bar",
+  title            = "Composition of DrugBank: Drug Types",
   showSampleNames  = FALSE,
-  title            ="Drugs Type Distribution",
-  xAxisTitle       = "Count"
+  legendPosition   = "right"
 )
 
-## ----eval=T-------------------------------------------------------------------
-## view proportions of the different drug types for each drug group
-type_stat <- drugs %>% 
-  full_join(drug_groups, by = c("drugbank_id")) %>% 
-  select(type, group) %>% 
+## ----analysis_groups----------------------------------------------------------
+# Prepare data: Cross-tabulate Type vs Group
+group_stat <- drugs %>% 
+  full_join(drug_groups, by = "drugbank_id") %>% 
   group_by(type, group) %>% 
-  summarise(count = n()) %>% 
-  pivot_wider(names_from = group, values_from = count) %>% 
+  summarise(count = n(), .groups = 'drop') %>% 
+  pivot_wider(names_from = group, values_from = count, values_fill = 0) %>% 
   column_to_rownames("type")
 
+# Visualize with a Stacked Bar Chart
 canvasXpress(
-  data           = type_stat,
+  data           = group_stat,
   graphType      = "Stacked",
-  legendColumns  = 2,
+  graphOrientation = "horizontal",
+  title          = "Drug Types by Approval Status",
+  xAxisTitle     = "Number of Drugs",
   legendPosition = "bottom",
-  title          ="Drug Type Distribution per Drug Group",
-  xAxisTitle     = "Quantity",
-  xAxis2Show     = TRUE,
-  xAxisShow      = FALSE,
-  smpTitle      = "Drug Group")
+  xAxis2Show     = FALSE
+)
 
-## ----eval=T-------------------------------------------------------------------
-## get counts of the different target actions in the data
-targetActionCounts <- 
-    drug_targets_actions %>% 
+## ----analysis_targets---------------------------------------------------------
+# Prepare data: Top 10 most common Mechanisms of Action
+targetActionCounts <- drug_targets_actions %>% 
     group_by(action) %>% 
-    summarise(count = n()) %>% 
-    arrange(desc(count)) %>% 
-    top_n(10) %>% 
+    summarise(Count = n()) %>% 
+    arrange(desc(Count)) %>% 
+    slice_head(n = 10) %>% 
     column_to_rownames("action")
 
-## get bar chart of the 10 most occurring target actions in the data
+# Visualize
 canvasXpress(
   data            = targetActionCounts,
   graphType       = "Bar",
-  legendColumns   = 2,
-  legendPosition  = "bottom",
-  title           = "Target Actions Distribution",
+  graphOrientation = "vertical",
+  colorBy         = "Count",
+  title           = "Top 10 Mechanisms of Action",
+  xAxisTitle      = "Number of Interactions",
   showSampleNames = FALSE,
-  xAxis2Show      = TRUE,
-  xAxisShow       = FALSE)
+  legendPosition  = "none"
+)
 

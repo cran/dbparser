@@ -10,11 +10,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<meta name="author" content="Mohammed Ali" />
 
-<meta name="date" content="2026-01-08" />
 
-<title>Unlocking DrugBank: Parsing and Visualizing Mechanistic Data</title>
+<title>Integrated Pharmacovigilance: Linking DrugBank, OnSIDES, and TWOSIDES</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -8368,147 +8366,492 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 
-<h1 class="title toc-ignore">Unlocking DrugBank: Parsing and Visualizing
-Mechanistic Data</h1>
-<h4 class="author">Mohammed Ali</h4>
-<h4 class="date">2026-01-08</h4>
+<h1 class="title toc-ignore">Integrated Pharmacovigilance: Linking
+DrugBank, OnSIDES, and TWOSIDES</h1>
 
 
 
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>The <strong>DrugBank</strong> database is the global gold standard
-for drug information, containing rich data on chemical structures,
-pharmacology, and molecular targets. However, the raw data is provided
-as a massive, complex XML file that is difficult to use in statistical
-analysis.</p>
-<p><code>dbparser</code> solves this problem. It transforms that complex
-XML into a <strong>Drugverse Object (<code>dvobject</code>)</strong>—a
-structured collection of R data frames ready for analysis.</p>
-<p>In this tutorial, we will demonstrate how to:</p>
+<p>In modern pharmacovigilance, analyzing drugs in isolation is often
+insufficient. Patients frequently take multiple medications, leading to
+complex <strong>Drug-Drug Interactions (DDIs)</strong>.</p>
+<p>The <code>dbparser</code> package now provides a unified framework to
+analyze the complete safety profile of a drug:</p>
 <ol style="list-style-type: decimal">
-<li>Parse the database.</li>
-<li>Explore the data structure.</li>
-<li>Visualize key insights using <code>dplyr</code> and
-<code>canvasXpress</code>.</li>
+<li><strong>Mechanism:</strong> Biological targets and pathways from
+<strong>DrugBank</strong>.</li>
+<li><strong>Phenotype (Single Drug):</strong> Real-world adverse events
+from <strong>OnSIDES</strong>.</li>
+<li><strong>Polypharmacy (Combinations):</strong> Interaction risks from
+<strong>TWOSIDES</strong>.</li>
 </ol>
+<p>This vignette demonstrates the complete workflow: loading all three
+databases, merging them into a single <code>dvobject</code>, and
+performing a scientific case study on the interaction between
+<strong>Leuprolide</strong> and <strong>Calcitriol</strong>.</p>
 </div>
-<div id="loading-data" class="section level2">
-<h2>1. Loading Data</h2>
-<div id="the-parsing-workflow" class="section level3">
-<h3>The Parsing Workflow</h3>
-<p>In a real-world scenario, you would parse the full XML database
-(downloaded from <a href="https://go.drugbank.com/releases/latest">DrugBank</a>) using
-<code>parseDrugBank()</code>.</p>
+<div id="prerequisites" class="section level2">
+<h2>Prerequisites</h2>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(dbparser)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co"># Parse the full XML file (this creates a dvobject)</span></span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co"># drugbank_db &lt;- parseDrugBank(&quot;drugbank_full_database.xml&quot;)</span></span></code></pre></div>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">library</span>(canvasXpress)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">library</span>(data.table)</span></code></pre></div>
 </div>
-<div id="loading-sample-data" class="section level3">
-<h3>Loading Sample Data</h3>
-<p>For this vignette, we will load curated sample datasets included in
-the package. These represent specific tables that would be found inside
-the full <code>dvobject</code>.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>({</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  <span class="fu">library</span>(tidyr)</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>  <span class="fu">library</span>(dplyr)</span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  <span class="fu">library</span>(tibble)</span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="fu">library</span>(canvasXpress)</span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>  <span class="fu">library</span>(dbparser)</span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>})</span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co"># Load sample tables representing parts of the parsed dvobject</span></span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>drugs <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">system.file</span>(<span class="st">&quot;drugs.RDS&quot;</span>, <span class="at">package =</span> <span class="st">&quot;dbparser&quot;</span>))</span>
-<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>drug_groups <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">system.file</span>(<span class="st">&quot;drug_groups.RDS&quot;</span>, <span class="at">package =</span> <span class="st">&quot;dbparser&quot;</span>))</span>
-<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>drug_targets_actions <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">system.file</span>(<span class="st">&quot;targets_actions.RDS&quot;</span>, <span class="at">package =</span> <span class="st">&quot;dbparser&quot;</span>))</span></code></pre></div>
+<div id="loading-and-inspecting-data" class="section level2">
+<h2>1. Loading and Inspecting Data</h2>
+<p>We will use the curated sample data files included in the
+<code>dbparser</code> package to demonstrate the workflow.</p>
+<div id="load-drugbank-the-hub" class="section level3">
+<h3>1.1 Load DrugBank (The Hub)</h3>
+<p>First, we load the mechanistic data.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Load sample DrugBank data included in the package</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>drugbank_path <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;two_drugs.RDS&quot;</span>, <span class="at">package =</span> <span class="st">&quot;dbparser&quot;</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>drugbank_db <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(drugbank_path)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co"># Review the drugbank object structure</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="fu">show_dvobject_metadata</span>(drugbank_db)</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; === BASIC INFO ===</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt;      Class Total_DataFrames Top_Level_Lists Object_Size</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt; 1 dvobject               55               3      1.5 Mb</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co">#&gt; === DATABASE METADATA ===</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co">#&gt;  Database     Type Version Export_Date</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt;  Original DrugBank     5.1  2025-01-02</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt; === DATA.FRAMES ===</span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co">#&gt;                                            Path Rows Cols     Size</span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt;                       drugs$general_information    2   15     8 Kb</span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="co">#&gt;                       drugs$drug_classification    2    9   3.8 Kb</span></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="co">#&gt;                                  drugs$synonyms   15    4   3.6 Kb</span></span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="co">#&gt;                              drugs$pharmacology    2   12  18.1 Kb</span></span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="co">#&gt;                      drugs$international_brands    9    3   2.7 Kb</span></span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a><span class="co">#&gt;                                  drugs$mixtures    5    3     2 Kb</span></span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="co">#&gt;                                 drugs$packagers   35    3   6.2 Kb</span></span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a><span class="co">#&gt;                             drugs$manufacturers   13    4   2.9 Kb</span></span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a><span class="co">#&gt;                                    drugs$prices   16    5   4.6 Kb</span></span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a><span class="co">#&gt;                                drugs$categories   58    3   9.2 Kb</span></span>
+<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a><span class="co">#&gt;                                   drugs$dosages  189    4  17.4 Kb</span></span>
+<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a><span class="co">#&gt;                                 drugs$atc_codes    4   10   4.3 Kb</span></span>
+<span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a><span class="co">#&gt;                                   drugs$patents   35    6   8.6 Kb</span></span>
+<span id="cb2-30"><a href="#cb2-30" tabindex="-1"></a><span class="co">#&gt;                         drugs$drug_interactions 1645    4 514.7 Kb</span></span>
+<span id="cb2-31"><a href="#cb2-31" tabindex="-1"></a><span class="co">#&gt;                                 drugs$sequences    1    3   1.3 Kb</span></span>
+<span id="cb2-32"><a href="#cb2-32" tabindex="-1"></a><span class="co">#&gt;                     drugs$calculated_properties   26    4   5.6 Kb</span></span>
+<span id="cb2-33"><a href="#cb2-33" tabindex="-1"></a><span class="co">#&gt;                   drugs$experimental_properties    5    4   2.4 Kb</span></span>
+<span id="cb2-34"><a href="#cb2-34" tabindex="-1"></a><span class="co">#&gt;                      drugs$external_identifiers   30    3   4.7 Kb</span></span>
+<span id="cb2-35"><a href="#cb2-35" tabindex="-1"></a><span class="co">#&gt;                               drugs$pdb_entries   19    2   2.4 Kb</span></span>
+<span id="cb2-36"><a href="#cb2-36" tabindex="-1"></a><span class="co">#&gt;                        drugs$affected_organisms    2    2   1.2 Kb</span></span>
+<span id="cb2-37"><a href="#cb2-37" tabindex="-1"></a><span class="co">#&gt;                                    drugs$groups    4    2   1.3 Kb</span></span>
+<span id="cb2-38"><a href="#cb2-38" tabindex="-1"></a><span class="co">#&gt;                            drugs$external_links    5    3   2.1 Kb</span></span>
+<span id="cb2-39"><a href="#cb2-39" tabindex="-1"></a><span class="co">#&gt;                                           salts    2    8   2.8 Kb</span></span>
+<span id="cb2-40"><a href="#cb2-40" tabindex="-1"></a><span class="co">#&gt;                                        products  190   19  68.6 Kb</span></span>
+<span id="cb2-41"><a href="#cb2-41" tabindex="-1"></a><span class="co">#&gt;                       references$drugs$articles   13    4   6.3 Kb</span></span>
+<span id="cb2-42"><a href="#cb2-42" tabindex="-1"></a><span class="co">#&gt;                          references$drugs$links   11    4   6.1 Kb</span></span>
+<span id="cb2-43"><a href="#cb2-43" tabindex="-1"></a><span class="co">#&gt;                       references$carriers$books    1    4   1.6 Kb</span></span>
+<span id="cb2-44"><a href="#cb2-44" tabindex="-1"></a><span class="co">#&gt;                    references$carriers$articles   15    4   5.4 Kb</span></span>
+<span id="cb2-45"><a href="#cb2-45" tabindex="-1"></a><span class="co">#&gt;                        references$enzymes$books   33    4   8.2 Kb</span></span>
+<span id="cb2-46"><a href="#cb2-46" tabindex="-1"></a><span class="co">#&gt;                     references$enzymes$articles 1573    4 485.5 Kb</span></span>
+<span id="cb2-47"><a href="#cb2-47" tabindex="-1"></a><span class="co">#&gt;                        references$enzymes$links  615    4 164.4 Kb</span></span>
+<span id="cb2-48"><a href="#cb2-48" tabindex="-1"></a><span class="co">#&gt;                  references$enzymes$attachments   55    4    20 Kb</span></span>
+<span id="cb2-49"><a href="#cb2-49" tabindex="-1"></a><span class="co">#&gt;                     references$targets$articles  101    4  27.4 Kb</span></span>
+<span id="cb2-50"><a href="#cb2-50" tabindex="-1"></a><span class="co">#&gt;                        references$targets$links   14    4   7.1 Kb</span></span>
+<span id="cb2-51"><a href="#cb2-51" tabindex="-1"></a><span class="co">#&gt;               cett$carriers$general_information    1    6   1.9 Kb</span></span>
+<span id="cb2-52"><a href="#cb2-52" tabindex="-1"></a><span class="co">#&gt;                           cett$carriers$actions    2    2   1.2 Kb</span></span>
+<span id="cb2-53"><a href="#cb2-53" tabindex="-1"></a><span class="co">#&gt;  cett$carriers$polypeptides$general_information    1   20   6.8 Kb</span></span>
+<span id="cb2-54"><a href="#cb2-54" tabindex="-1"></a><span class="co">#&gt;      cett$carriers$polypeptides$external_identy    7    3   2.2 Kb</span></span>
+<span id="cb2-55"><a href="#cb2-55" tabindex="-1"></a><span class="co">#&gt;             cett$carriers$polypeptides$synonyms   10    2     2 Kb</span></span>
+<span id="cb2-56"><a href="#cb2-56" tabindex="-1"></a><span class="co">#&gt;                cett$carriers$polypeptides$pfams    2    3   1.5 Kb</span></span>
+<span id="cb2-57"><a href="#cb2-57" tabindex="-1"></a><span class="co">#&gt;                   cett$carriers$polypeptides$go    2    3   1.5 Kb</span></span>
+<span id="cb2-58"><a href="#cb2-58" tabindex="-1"></a><span class="co">#&gt;                cett$enzymes$general_information    2    8   2.6 Kb</span></span>
+<span id="cb2-59"><a href="#cb2-59" tabindex="-1"></a><span class="co">#&gt;                            cett$enzymes$actions    7    2   1.5 Kb</span></span>
+<span id="cb2-60"><a href="#cb2-60" tabindex="-1"></a><span class="co">#&gt;   cett$enzymes$polypeptides$general_information    2   20    14 Kb</span></span>
+<span id="cb2-61"><a href="#cb2-61" tabindex="-1"></a><span class="co">#&gt;       cett$enzymes$polypeptides$external_identy   15    3     3 Kb</span></span>
+<span id="cb2-62"><a href="#cb2-62" tabindex="-1"></a><span class="co">#&gt;              cett$enzymes$polypeptides$synonyms   21    2     3 Kb</span></span>
+<span id="cb2-63"><a href="#cb2-63" tabindex="-1"></a><span class="co">#&gt;                 cett$enzymes$polypeptides$pfams    2    3   1.4 Kb</span></span>
+<span id="cb2-64"><a href="#cb2-64" tabindex="-1"></a><span class="co">#&gt;                    cett$enzymes$polypeptides$go   21    3   3.6 Kb</span></span>
+<span id="cb2-65"><a href="#cb2-65" tabindex="-1"></a><span class="co">#&gt;                cett$targets$general_information    4    6   2.6 Kb</span></span>
+<span id="cb2-66"><a href="#cb2-66" tabindex="-1"></a><span class="co">#&gt;                            cett$targets$actions   10    2   1.9 Kb</span></span>
+<span id="cb2-67"><a href="#cb2-67" tabindex="-1"></a><span class="co">#&gt;   cett$targets$polypeptides$general_information    4   20  14.2 Kb</span></span>
+<span id="cb2-68"><a href="#cb2-68" tabindex="-1"></a><span class="co">#&gt;       cett$targets$polypeptides$external_identy   26    3   3.9 Kb</span></span>
+<span id="cb2-69"><a href="#cb2-69" tabindex="-1"></a><span class="co">#&gt;              cett$targets$polypeptides$synonyms   15    2   2.4 Kb</span></span>
+<span id="cb2-70"><a href="#cb2-70" tabindex="-1"></a><span class="co">#&gt;                 cett$targets$polypeptides$pfams    5    3   2.1 Kb</span></span>
+<span id="cb2-71"><a href="#cb2-71" tabindex="-1"></a><span class="co">#&gt;                    cett$targets$polypeptides$go   37    3   5.6 Kb</span></span></code></pre></div>
+</div>
+<div id="load-onsides-single-drug-labels" class="section level3">
+<h3>1.2 Load OnSIDES (Single-Drug Labels)</h3>
+<p>Next, we load the adverse event data extracted from FDA labels.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Load sample OnSIDES data included in the package</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>onsides_path <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;onside.RDS&quot;</span>, <span class="at">package =</span> <span class="st">&quot;dbparser&quot;</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>onsides_db   <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(onsides_path)</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co"># Review the onsides_db object structure</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="fu">show_dvobject_metadata</span>(onsides_db)</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; === BASIC INFO ===</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt;      Class Total_DataFrames Top_Level_Lists Object_Size</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; 1 dvobject                8               0      2.3 Mb</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; === DATABASE METADATA ===</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt;  Database    Type Version Export_Date</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt;  Original OnSIDES   3.1.1  April 2025</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; === DATA.FRAMES ===</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt;                                Path  Rows Cols    Size</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt;              product_adverse_effect 52745    7  2.2 Mb</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt;                     high_confidence     2    2  1.4 Kb</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt;                       product_label    95    5 39.7 Kb</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt;                   product_to_rxnorm   160    2  5.5 Kb</span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt;  vocab_rxnorm_ingredient_to_product    17    2  2.7 Kb</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt;         vocab_meddra_adverse_effect   347    3 31.6 Kb</span></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co">#&gt;             vocab_rxnorm_ingredient     3    3  2.1 Kb</span></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co">#&gt;                vocab_rxnorm_product    17    3  4.9 Kb</span></span></code></pre></div>
+</div>
+<div id="load-twosides-drug-interactions" class="section level3">
+<h3>1.3 Load TWOSIDES (Drug Interactions)</h3>
+<p>Finally, we load the dataset containing adverse events reported when
+two drugs are taken simultaneously.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Load sample TWOSIDES data included in the package</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>twosides_path <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;twoside_raw.zip&quot;</span>, <span class="at">package =</span> <span class="st">&quot;dbparser&quot;</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="cf">if</span>(<span class="fu">file.exists</span>(twosides_path)) {</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  twosides_db <span class="ot">&lt;-</span> <span class="fu">parseTWOSIDES</span>(twosides_path)</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>  <span class="co"># Fallback for demonstration if file is not yet in the build</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>  <span class="co"># Mocking structure similar to actual TWOSIDES output</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>  twosides_db <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">drug_drug_interactions =</span> <span class="fu">data.table</span>(</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>    <span class="at">drug_1_rxnorm_id =</span> <span class="st">&quot;42375&quot;</span>, <span class="at">drug_1_concept_name =</span> <span class="st">&quot;Leuprolide&quot;</span>,</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>    <span class="at">drug_2_rxnorm_id =</span> <span class="st">&quot;1894&quot;</span>, <span class="at">drug_2_concept_name =</span> <span class="st">&quot;Calcitriol&quot;</span>,</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>    <span class="at">condition_meddra_id =</span> <span class="st">&quot;10002034&quot;</span>, <span class="at">condition_concept_name =</span> <span class="st">&quot;Anaemia&quot;</span>,</span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>    <span class="at">PRR =</span> <span class="st">&quot;13.33&quot;</span>, <span class="at">mean_reporting_frequency =</span> <span class="st">&quot;0.12&quot;</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>  ))</span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>  <span class="fu">class</span>(twosides_db) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;TWOSIDESDb&quot;</span>, <span class="st">&quot;dvobject&quot;</span>, <span class="st">&quot;list&quot;</span>)</span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>  <span class="fu">attr</span>(twosides_db, <span class="st">&quot;original_db_info&quot;</span>) <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">type=</span><span class="st">&quot;TWOSIDES&quot;</span>, <span class="at">version=</span><span class="st">&quot;2.0&quot;</span>)</span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>}</span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="co"># Review structure</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="fu">show_dvobject_metadata</span>(twosides_db)</span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="co">#&gt; === BASIC INFO ===</span></span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="co">#&gt;      Class Total_DataFrames Top_Level_Lists Object_Size</span></span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="co">#&gt; 1 dvobject                1               0    217.6 Kb</span></span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="co">#&gt; === DATABASE METADATA ===</span></span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a><span class="co">#&gt;  Database       Type Version Export_Date</span></span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a><span class="co">#&gt;  Original TWOSIDESDB Unknown     Unknown</span></span>
+<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a><span class="co">#&gt; === DATA.FRAMES ===</span></span>
+<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a><span class="co">#&gt;                    Path Rows Cols     Size</span></span>
+<span id="cb4-31"><a href="#cb4-31" tabindex="-1"></a><span class="co">#&gt;  drug_drug_interactions 1706   13 216.6 Kb</span></span></code></pre></div>
 </div>
 </div>
-<div id="analysis-the-drug-landscape" class="section level2">
-<h2>2. Analysis: The Drug Landscape</h2>
-<p>What does the universe of approved drugs look like? Let’s analyze the
-composition of the database by drug type (Small Molecule
-vs. Biotech).</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Prepare data: Count drugs by type</span></span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>type_stat <span class="ot">&lt;-</span> drugs <span class="sc">%&gt;%</span> </span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  <span class="fu">group_by</span>(type) <span class="sc">%&gt;%</span> </span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">Count =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span> </span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(Count)) <span class="sc">%&gt;%</span> </span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>  <span class="fu">column_to_rownames</span>(<span class="st">&quot;type&quot;</span>)</span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co"># Visualize</span></span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="fu">canvasXpress</span>(</span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>  <span class="at">data             =</span> type_stat,</span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>  <span class="at">graphType        =</span> <span class="st">&quot;Bar&quot;</span>,</span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>  <span class="at">title            =</span> <span class="st">&quot;Composition of DrugBank: Drug Types&quot;</span>,</span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>  <span class="at">showSampleNames  =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>  <span class="at">legendPosition   =</span> <span class="st">&quot;right&quot;</span></span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>)</span></code></pre></div>
-<div id="htmlwidget-ad3ba5dcefdf30c6103b" style="width:600px;height:400px;" class="canvasXpress html-widget"></div>
-<script type="application/json" data-for="htmlwidget-ad3ba5dcefdf30c6103b">{"x":{"data":{"y":{"vars":["small molecule","biotech"],"smps":["Count"],"data":[[12695],[3880]]},"x":null,"z":null},"config":{"graphType":"Bar","isR":true,"title":"Composition of DrugBank: Drug Types","showSampleNames":false,"legendPosition":"right"},"events":null,"afterRender":null},"evals":[],"jsHooks":[]}</script>
+<div id="merging-the-databases-chaining" class="section level2">
+<h2>2. Merging the Databases (Chaining)</h2>
+<p>We integrate the databases in a chain. First, we merge OnSIDES into
+DrugBank, and then we merge TWOSIDES into the result. This creates a
+single “Hub and Spoke” object centered on DrugBank.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># Step 1: Merge DrugBank + OnSIDES</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>db_plus_onsides <span class="ot">&lt;-</span> <span class="fu">merge_drugbank_onsides</span>(drugbank_db, onsides_db)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co"># Step 2: Merge Result + TWOSIDES</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co"># The function is chainable and automatically detects the existing data</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>final_db <span class="ot">&lt;-</span> <span class="fu">merge_drugbank_twosides</span>(db_plus_onsides, twosides_db)</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co"># Review final object structure</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co"># Note the presence of &#39;drugbank&#39;, &#39;onsides&#39;, &#39;twosides&#39;, and &#39;integrated_data&#39;</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="fu">show_dvobject_metadata</span>(final_db)</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt; === BASIC INFO ===</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt;                                             Class Total_DataFrames</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt; 1 DrugBankTWOSIDESDb, DrugBankOnSIDESDb, dvobject               68</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt;   Top_Level_Lists Object_Size</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt; 1               4      4.3 Mb</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt; === DATABASE METADATA ===</span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="co">#&gt;         Database       Type Version Export_Date</span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co">#&gt;   First Database   DrugBank     5.1  2025-01-02</span></span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="co">#&gt;  Second Database TWOSIDESDB Unknown     Unknown</span></span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a><span class="co">#&gt; === DATA.FRAMES ===</span></span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a><span class="co">#&gt;                                                     Path  Rows Cols     Size</span></span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a><span class="co">#&gt;                       drugbank$drugs$general_information     2   15     8 Kb</span></span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a><span class="co">#&gt;                       drugbank$drugs$drug_classification     2    9   3.8 Kb</span></span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a><span class="co">#&gt;                                  drugbank$drugs$synonyms    15    4   3.6 Kb</span></span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a><span class="co">#&gt;                              drugbank$drugs$pharmacology     2   12  18.1 Kb</span></span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a><span class="co">#&gt;                      drugbank$drugs$international_brands     9    3   2.7 Kb</span></span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a><span class="co">#&gt;                                  drugbank$drugs$mixtures     5    3     2 Kb</span></span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a><span class="co">#&gt;                                 drugbank$drugs$packagers    35    3   6.2 Kb</span></span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a><span class="co">#&gt;                             drugbank$drugs$manufacturers    13    4   2.9 Kb</span></span>
+<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a><span class="co">#&gt;                                    drugbank$drugs$prices    16    5   4.6 Kb</span></span>
+<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a><span class="co">#&gt;                                drugbank$drugs$categories    58    3   9.2 Kb</span></span>
+<span id="cb5-34"><a href="#cb5-34" tabindex="-1"></a><span class="co">#&gt;                                   drugbank$drugs$dosages   189    4  17.4 Kb</span></span>
+<span id="cb5-35"><a href="#cb5-35" tabindex="-1"></a><span class="co">#&gt;                                 drugbank$drugs$atc_codes     4   10   4.3 Kb</span></span>
+<span id="cb5-36"><a href="#cb5-36" tabindex="-1"></a><span class="co">#&gt;                                   drugbank$drugs$patents    35    6   8.6 Kb</span></span>
+<span id="cb5-37"><a href="#cb5-37" tabindex="-1"></a><span class="co">#&gt;                         drugbank$drugs$drug_interactions  1645    4 514.7 Kb</span></span>
+<span id="cb5-38"><a href="#cb5-38" tabindex="-1"></a><span class="co">#&gt;                                 drugbank$drugs$sequences     1    3   1.3 Kb</span></span>
+<span id="cb5-39"><a href="#cb5-39" tabindex="-1"></a><span class="co">#&gt;                     drugbank$drugs$calculated_properties    26    4   5.6 Kb</span></span>
+<span id="cb5-40"><a href="#cb5-40" tabindex="-1"></a><span class="co">#&gt;                   drugbank$drugs$experimental_properties     5    4   2.4 Kb</span></span>
+<span id="cb5-41"><a href="#cb5-41" tabindex="-1"></a><span class="co">#&gt;                      drugbank$drugs$external_identifiers    30    3   4.7 Kb</span></span>
+<span id="cb5-42"><a href="#cb5-42" tabindex="-1"></a><span class="co">#&gt;                               drugbank$drugs$pdb_entries    19    2   2.4 Kb</span></span>
+<span id="cb5-43"><a href="#cb5-43" tabindex="-1"></a><span class="co">#&gt;                        drugbank$drugs$affected_organisms     2    2   1.2 Kb</span></span>
+<span id="cb5-44"><a href="#cb5-44" tabindex="-1"></a><span class="co">#&gt;                                    drugbank$drugs$groups     4    2   1.3 Kb</span></span>
+<span id="cb5-45"><a href="#cb5-45" tabindex="-1"></a><span class="co">#&gt;                            drugbank$drugs$external_links     5    3   2.1 Kb</span></span>
+<span id="cb5-46"><a href="#cb5-46" tabindex="-1"></a><span class="co">#&gt;                                           drugbank$salts     2    8   2.8 Kb</span></span>
+<span id="cb5-47"><a href="#cb5-47" tabindex="-1"></a><span class="co">#&gt;                                        drugbank$products   190   19  68.6 Kb</span></span>
+<span id="cb5-48"><a href="#cb5-48" tabindex="-1"></a><span class="co">#&gt;                       drugbank$references$drugs$articles    13    4   6.3 Kb</span></span>
+<span id="cb5-49"><a href="#cb5-49" tabindex="-1"></a><span class="co">#&gt;                          drugbank$references$drugs$links    11    4   6.1 Kb</span></span>
+<span id="cb5-50"><a href="#cb5-50" tabindex="-1"></a><span class="co">#&gt;                       drugbank$references$carriers$books     1    4   1.6 Kb</span></span>
+<span id="cb5-51"><a href="#cb5-51" tabindex="-1"></a><span class="co">#&gt;                    drugbank$references$carriers$articles    15    4   5.4 Kb</span></span>
+<span id="cb5-52"><a href="#cb5-52" tabindex="-1"></a><span class="co">#&gt;                        drugbank$references$enzymes$books    33    4   8.2 Kb</span></span>
+<span id="cb5-53"><a href="#cb5-53" tabindex="-1"></a><span class="co">#&gt;                     drugbank$references$enzymes$articles  1573    4 485.5 Kb</span></span>
+<span id="cb5-54"><a href="#cb5-54" tabindex="-1"></a><span class="co">#&gt;                        drugbank$references$enzymes$links   615    4 164.4 Kb</span></span>
+<span id="cb5-55"><a href="#cb5-55" tabindex="-1"></a><span class="co">#&gt;                  drugbank$references$enzymes$attachments    55    4    20 Kb</span></span>
+<span id="cb5-56"><a href="#cb5-56" tabindex="-1"></a><span class="co">#&gt;                     drugbank$references$targets$articles   101    4  27.4 Kb</span></span>
+<span id="cb5-57"><a href="#cb5-57" tabindex="-1"></a><span class="co">#&gt;                        drugbank$references$targets$links    14    4   7.1 Kb</span></span>
+<span id="cb5-58"><a href="#cb5-58" tabindex="-1"></a><span class="co">#&gt;               drugbank$cett$carriers$general_information     1    6   1.9 Kb</span></span>
+<span id="cb5-59"><a href="#cb5-59" tabindex="-1"></a><span class="co">#&gt;                           drugbank$cett$carriers$actions     2    2   1.2 Kb</span></span>
+<span id="cb5-60"><a href="#cb5-60" tabindex="-1"></a><span class="co">#&gt;  drugbank$cett$carriers$polypeptides$general_information     1   20   6.8 Kb</span></span>
+<span id="cb5-61"><a href="#cb5-61" tabindex="-1"></a><span class="co">#&gt;      drugbank$cett$carriers$polypeptides$external_identy     7    3   2.2 Kb</span></span>
+<span id="cb5-62"><a href="#cb5-62" tabindex="-1"></a><span class="co">#&gt;             drugbank$cett$carriers$polypeptides$synonyms    10    2     2 Kb</span></span>
+<span id="cb5-63"><a href="#cb5-63" tabindex="-1"></a><span class="co">#&gt;                drugbank$cett$carriers$polypeptides$pfams     2    3   1.5 Kb</span></span>
+<span id="cb5-64"><a href="#cb5-64" tabindex="-1"></a><span class="co">#&gt;                   drugbank$cett$carriers$polypeptides$go     2    3   1.5 Kb</span></span>
+<span id="cb5-65"><a href="#cb5-65" tabindex="-1"></a><span class="co">#&gt;                drugbank$cett$enzymes$general_information     2    8   2.6 Kb</span></span>
+<span id="cb5-66"><a href="#cb5-66" tabindex="-1"></a><span class="co">#&gt;                            drugbank$cett$enzymes$actions     7    2   1.5 Kb</span></span>
+<span id="cb5-67"><a href="#cb5-67" tabindex="-1"></a><span class="co">#&gt;   drugbank$cett$enzymes$polypeptides$general_information     2   20    14 Kb</span></span>
+<span id="cb5-68"><a href="#cb5-68" tabindex="-1"></a><span class="co">#&gt;       drugbank$cett$enzymes$polypeptides$external_identy    15    3     3 Kb</span></span>
+<span id="cb5-69"><a href="#cb5-69" tabindex="-1"></a><span class="co">#&gt;              drugbank$cett$enzymes$polypeptides$synonyms    21    2     3 Kb</span></span>
+<span id="cb5-70"><a href="#cb5-70" tabindex="-1"></a><span class="co">#&gt;                 drugbank$cett$enzymes$polypeptides$pfams     2    3   1.4 Kb</span></span>
+<span id="cb5-71"><a href="#cb5-71" tabindex="-1"></a><span class="co">#&gt;                    drugbank$cett$enzymes$polypeptides$go    21    3   3.6 Kb</span></span>
+<span id="cb5-72"><a href="#cb5-72" tabindex="-1"></a><span class="co">#&gt;                drugbank$cett$targets$general_information     4    6   2.6 Kb</span></span>
+<span id="cb5-73"><a href="#cb5-73" tabindex="-1"></a><span class="co">#&gt;                            drugbank$cett$targets$actions    10    2   1.9 Kb</span></span>
+<span id="cb5-74"><a href="#cb5-74" tabindex="-1"></a><span class="co">#&gt;   drugbank$cett$targets$polypeptides$general_information     4   20  14.2 Kb</span></span>
+<span id="cb5-75"><a href="#cb5-75" tabindex="-1"></a><span class="co">#&gt;       drugbank$cett$targets$polypeptides$external_identy    26    3   3.9 Kb</span></span>
+<span id="cb5-76"><a href="#cb5-76" tabindex="-1"></a><span class="co">#&gt;              drugbank$cett$targets$polypeptides$synonyms    15    2   2.4 Kb</span></span>
+<span id="cb5-77"><a href="#cb5-77" tabindex="-1"></a><span class="co">#&gt;                 drugbank$cett$targets$polypeptides$pfams     5    3   2.1 Kb</span></span>
+<span id="cb5-78"><a href="#cb5-78" tabindex="-1"></a><span class="co">#&gt;                    drugbank$cett$targets$polypeptides$go    37    3   5.6 Kb</span></span>
+<span id="cb5-79"><a href="#cb5-79" tabindex="-1"></a><span class="co">#&gt;                           onsides$product_adverse_effect 52745    7   2.2 Mb</span></span>
+<span id="cb5-80"><a href="#cb5-80" tabindex="-1"></a><span class="co">#&gt;                                  onsides$high_confidence     2    2   1.4 Kb</span></span>
+<span id="cb5-81"><a href="#cb5-81" tabindex="-1"></a><span class="co">#&gt;                                    onsides$product_label    95    5  39.7 Kb</span></span>
+<span id="cb5-82"><a href="#cb5-82" tabindex="-1"></a><span class="co">#&gt;                                onsides$product_to_rxnorm   160    2   5.5 Kb</span></span>
+<span id="cb5-83"><a href="#cb5-83" tabindex="-1"></a><span class="co">#&gt;               onsides$vocab_rxnorm_ingredient_to_product    17    2   2.7 Kb</span></span>
+<span id="cb5-84"><a href="#cb5-84" tabindex="-1"></a><span class="co">#&gt;                      onsides$vocab_meddra_adverse_effect   347    3  31.6 Kb</span></span>
+<span id="cb5-85"><a href="#cb5-85" tabindex="-1"></a><span class="co">#&gt;                          onsides$vocab_rxnorm_ingredient     3    3   2.1 Kb</span></span>
+<span id="cb5-86"><a href="#cb5-86" tabindex="-1"></a><span class="co">#&gt;                             onsides$vocab_rxnorm_product    17    3   4.9 Kb</span></span>
+<span id="cb5-87"><a href="#cb5-87" tabindex="-1"></a><span class="co">#&gt;         integrated_data$vocab_rxnorm_ingredient_enriched     3    4   2.3 Kb</span></span>
+<span id="cb5-88"><a href="#cb5-88" tabindex="-1"></a><span class="co">#&gt;                 integrated_data$high_confidence_enriched     2    3   1.6 Kb</span></span>
+<span id="cb5-89"><a href="#cb5-89" tabindex="-1"></a><span class="co">#&gt;                   integrated_data$DrugBank_RxCUI_Mapping     2    2   1.2 Kb</span></span>
+<span id="cb5-90"><a href="#cb5-90" tabindex="-1"></a><span class="co">#&gt;                   integrated_data$drug_drug_interactions  1706   17 340.1 Kb</span></span>
+<span id="cb5-91"><a href="#cb5-91" tabindex="-1"></a><span class="co">#&gt;                          twosides$drug_drug_interactions  1706   13 216.6 Kb</span></span></code></pre></div>
 </div>
-<div id="analysis-approval-status" class="section level2">
-<h2>3. Analysis: Approval Status</h2>
-<p>Drugs are categorized into groups such as “approved”,
-“investigational”, or “experimental”. How does the complexity (Biotech
-vs. Small Molecule) differ across these groups?</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Prepare data: Cross-tabulate Type vs Group</span></span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>group_stat <span class="ot">&lt;-</span> drugs <span class="sc">%&gt;%</span> </span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="fu">full_join</span>(drug_groups, <span class="at">by =</span> <span class="st">&quot;drugbank_id&quot;</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="fu">group_by</span>(type, group) <span class="sc">%&gt;%</span> </span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">count =</span> <span class="fu">n</span>(), <span class="at">.groups =</span> <span class="st">&#39;drop&#39;</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> group, <span class="at">values_from =</span> count, <span class="at">values_fill =</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>  <span class="fu">column_to_rownames</span>(<span class="st">&quot;type&quot;</span>)</span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a></span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co"># Visualize with a Stacked Bar Chart</span></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="fu">canvasXpress</span>(</span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>  <span class="at">data           =</span> group_stat,</span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>  <span class="at">graphType      =</span> <span class="st">&quot;Stacked&quot;</span>,</span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>  <span class="at">graphOrientation =</span> <span class="st">&quot;horizontal&quot;</span>,</span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>  <span class="at">title          =</span> <span class="st">&quot;Drug Types by Approval Status&quot;</span>,</span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>  <span class="at">xAxisTitle     =</span> <span class="st">&quot;Number of Drugs&quot;</span>,</span>
-<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>  <span class="at">legendPosition =</span> <span class="st">&quot;bottom&quot;</span>,</span>
-<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>  <span class="at">xAxis2Show     =</span> <span class="cn">FALSE</span></span>
-<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>)</span></code></pre></div>
-<div id="htmlwidget-dcc27097e92b453d00a4" style="width:600px;height:400px;" class="canvasXpress html-widget"></div>
-<script type="application/json" data-for="htmlwidget-dcc27097e92b453d00a4">{"x":{"data":{"y":{"vars":["biotech","small molecule"],"smps":["approved","experimental","investigational","nutraceutical","vet_approved","withdrawn","illicit"],"data":[[1613,375,2395,17,8,31,0],[2761,6348,4850,118,419,286,205]]},"x":null,"z":null},"config":{"graphType":"Stacked","isR":true,"graphOrientation":"horizontal","title":"Drug Types by Approval Status","xAxisTitle":"Number of Drugs","legendPosition":"bottom","xAxis2Show":false},"events":null,"afterRender":null},"evals":[],"jsHooks":[]}</script>
+<div id="single-drug-analysis-leuprolide-db00007" class="section level2">
+<h2>3. Single Drug Analysis: Leuprolide (DB00007)</h2>
+<p><strong>Scientific Context:</strong> Leuprolide is a GnRH analog. We
+first establish its baseline side effect profile from OnSIDES.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>target_drug_id <span class="ot">&lt;-</span> <span class="st">&quot;DB00007&quot;</span> <span class="co"># Leuprolide</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co"># 1. Get the RxNorm ID from the bridge table</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>mapping_df <span class="ot">&lt;-</span> final_db<span class="sc">$</span>integrated_data<span class="sc">$</span>DrugBank_RxCUI_Mapping <span class="sc">%&gt;%</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="fu">filter</span>(drugbank_id <span class="sc">==</span> target_drug_id)</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>target_rxcui <span class="ot">&lt;-</span> mapping_df<span class="sc">$</span>rxcui[<span class="dv">1</span>]</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste0</span>(<span class="st">&quot;DrugBank ID: &quot;</span>, target_drug_id, <span class="st">&quot; maps to RxNorm CUI: &quot;</span>, target_rxcui))</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt; [1] &quot;DrugBank ID: DB00007 maps to RxNorm CUI: 42375&quot;</span></span></code></pre></div>
+<div id="extract-baseline-adverse-events-onsides" class="section level3">
+<h3>3.1 Extract Baseline Adverse Events (OnSIDES)</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># 1. Find product labels linked to this ingredient</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>product_rxcuis <span class="ot">&lt;-</span> final_db<span class="sc">$</span>onsides<span class="sc">$</span>vocab_rxnorm_ingredient_to_product <span class="sc">%&gt;%</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="fu">filter</span>(ingredient_id <span class="sc">==</span> target_rxcui) <span class="sc">%&gt;%</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="fu">pull</span>(product_id)</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>target_label_ids <span class="ot">&lt;-</span> final_db<span class="sc">$</span>onsides<span class="sc">$</span>product_to_rxnorm <span class="sc">%&gt;%</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>  <span class="fu">filter</span>(rxnorm_product_id <span class="sc">%in%</span> product_rxcuis) <span class="sc">%&gt;%</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>  <span class="fu">pull</span>(label_id)</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co"># 2. Extract and summarize events</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>ae_summary <span class="ot">&lt;-</span> final_db<span class="sc">$</span>onsides<span class="sc">$</span>product_adverse_effect <span class="sc">%&gt;%</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>  <span class="fu">filter</span>(product_label_id <span class="sc">%in%</span> target_label_ids) <span class="sc">%&gt;%</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>  <span class="fu">group_by</span>(effect_meddra_id) <span class="sc">%&gt;%</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">Count =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(Count)) <span class="sc">%&gt;%</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">10</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>  <span class="fu">left_join</span>(final_db<span class="sc">$</span>onsides<span class="sc">$</span>vocab_meddra_adverse_effect, </span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a>            <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;effect_meddra_id&quot;</span> <span class="ot">=</span> <span class="st">&quot;meddra_id&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a>  <span class="fu">select</span>(effect_meddra_id, meddra_name, Count)</span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="co"># Fill NAs for demo purposes (if vocab is incomplete in sample)</span></span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a>ae_summary <span class="ot">&lt;-</span> ae_summary <span class="sc">%&gt;%</span></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">meddra_name =</span> <span class="fu">case_when</span>(</span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a>    effect_meddra_id <span class="sc">==</span> <span class="dv">10033336</span> <span class="sc">~</span> <span class="st">&quot;Pain&quot;</span>,</span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a>    effect_meddra_id <span class="sc">==</span> <span class="dv">10039769</span> <span class="sc">~</span> <span class="st">&quot;Rash&quot;</span>, </span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a>    effect_meddra_id <span class="sc">==</span> <span class="dv">10052995</span> <span class="sc">~</span> <span class="st">&quot;Hot flush&quot;</span>,</span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a>    effect_meddra_id <span class="sc">==</span> <span class="dv">10009226</span> <span class="sc">~</span> <span class="st">&quot;Constipation&quot;</span>,</span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a>    effect_meddra_id <span class="sc">==</span> <span class="dv">10006068</span> <span class="sc">~</span> <span class="st">&quot;Bone pain&quot;</span>,</span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> meddra_name</span>
+<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a>  )) <span class="sc">%&gt;%</span></span>
+<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Adverse_Event =</span> meddra_name)</span>
+<span id="cb7-32"><a href="#cb7-32" tabindex="-1"></a></span>
+<span id="cb7-33"><a href="#cb7-33" tabindex="-1"></a><span class="fu">print</span>(ae_summary)</span>
+<span id="cb7-34"><a href="#cb7-34" tabindex="-1"></a><span class="co">#&gt; # A tibble: 10 × 3</span></span>
+<span id="cb7-35"><a href="#cb7-35" tabindex="-1"></a><span class="co">#&gt;    effect_meddra_id Adverse_Event Count</span></span>
+<span id="cb7-36"><a href="#cb7-36" tabindex="-1"></a><span class="co">#&gt;               &lt;int&gt; &lt;chr&gt;         &lt;int&gt;</span></span>
+<span id="cb7-37"><a href="#cb7-37" tabindex="-1"></a><span class="co">#&gt;  1         10033336 Pain          10659</span></span>
+<span id="cb7-38"><a href="#cb7-38" tabindex="-1"></a><span class="co">#&gt;  2         10029197 Nervous         711</span></span>
+<span id="cb7-39"><a href="#cb7-39" tabindex="-1"></a><span class="co">#&gt;  3         10039769 Rash            526</span></span>
+<span id="cb7-40"><a href="#cb7-40" tabindex="-1"></a><span class="co">#&gt;  4         10017735 Gas             504</span></span>
+<span id="cb7-41"><a href="#cb7-41" tabindex="-1"></a><span class="co">#&gt;  5         10010904 Convulsion      424</span></span>
+<span id="cb7-42"><a href="#cb7-42" tabindex="-1"></a><span class="co">#&gt;  6         10019211 Headache        351</span></span>
+<span id="cb7-43"><a href="#cb7-43" tabindex="-1"></a><span class="co">#&gt;  7         10052995 Hot flush       350</span></span>
+<span id="cb7-44"><a href="#cb7-44" tabindex="-1"></a><span class="co">#&gt;  8         10010914 Convulsions     349</span></span>
+<span id="cb7-45"><a href="#cb7-45" tabindex="-1"></a><span class="co">#&gt;  9         10009226 Constipation    262</span></span>
+<span id="cb7-46"><a href="#cb7-46" tabindex="-1"></a><span class="co">#&gt; 10         10006068 Bone pain       247</span></span></code></pre></div>
 </div>
-<div id="analysis-molecular-mechanisms" class="section level2">
-<h2>4. Analysis: Molecular Mechanisms</h2>
-<p>One of DrugBank’s most valuable features is the detailed information
-on how drugs interact with their targets (Proteins, Enzymes, etc.). Are
-drugs mostly inhibitors, agonists, or antagonists?</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># Prepare data: Top 10 most common Mechanisms of Action</span></span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>targetActionCounts <span class="ot">&lt;-</span> drug_targets_actions <span class="sc">%&gt;%</span> </span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>    <span class="fu">group_by</span>(action) <span class="sc">%&gt;%</span> </span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">Count =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span> </span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>    <span class="fu">arrange</span>(<span class="fu">desc</span>(Count)) <span class="sc">%&gt;%</span> </span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>    <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>    <span class="fu">column_to_rownames</span>(<span class="st">&quot;action&quot;</span>)</span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a></span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co"># Visualize</span></span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="fu">canvasXpress</span>(</span>
-<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>  <span class="at">data            =</span> targetActionCounts,</span>
-<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>  <span class="at">graphType       =</span> <span class="st">&quot;Bar&quot;</span>,</span>
-<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>  <span class="at">graphOrientation =</span> <span class="st">&quot;vertical&quot;</span>,</span>
-<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>  <span class="at">colorBy         =</span> <span class="st">&quot;Count&quot;</span>,</span>
-<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>  <span class="at">title           =</span> <span class="st">&quot;Top 10 Mechanisms of Action&quot;</span>,</span>
-<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>  <span class="at">xAxisTitle      =</span> <span class="st">&quot;Number of Interactions&quot;</span>,</span>
-<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>  <span class="at">showSampleNames =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>  <span class="at">legendPosition  =</span> <span class="st">&quot;none&quot;</span></span>
-<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>)</span></code></pre></div>
-<div id="htmlwidget-25a34395ca82570b47e7" style="width:600px;height:400px;" class="canvasXpress html-widget"></div>
-<script type="application/json" data-for="htmlwidget-25a34395ca82570b47e7">{"x":{"data":{"y":{"vars":["inhibitor","antagonist","ligand","binder","agonist","cofactor","activator","substrate","inducer","antibody"],"smps":["Count"],"data":[[1229],[375],[353],[298],[296],[156],[122],[107],[105],[80]]},"x":null,"z":null},"config":{"graphType":"Bar","isR":true,"graphOrientation":"vertical","colorBy":"Count","title":"Top 10 Mechanisms of Action","xAxisTitle":"Number of Interactions","showSampleNames":false,"legendPosition":"none"},"events":null,"afterRender":null},"evals":[],"jsHooks":[]}</script>
 </div>
-<div id="next-steps-integrated-pharmacovigilance" class="section level2">
-<h2>5. Next Steps: Integrated Pharmacovigilance</h2>
-<p>Now that you have mastered the mechanistic data in DrugBank, you can
-combine it with real-world data!</p>
-<p><code>dbparser</code> now supports <strong>OnSIDES</strong> (Adverse
-Events) and <strong>TWOSIDES</strong> (Drug-Drug Interactions).</p>
-<p>Check out the <strong><a href="drugbank_nside.html">Integrated
-Pharmacovigilance Vignette</a></strong> to learn how to merge these
-databases to perform polypharmacy risk analysis.</p>
+<div id="single-drug-analysis-calcitriol-db00136" class="section level2">
+<h2>4. Single Drug Analysis: Calcitriol (DB00136)</h2>
+<p>We repeat the process for Calcitriol to establish its baseline.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>target_drug_id_2 <span class="ot">&lt;-</span> <span class="st">&quot;DB00136&quot;</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co"># Get RxCUI</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>mapping_df_2 <span class="ot">&lt;-</span> final_db<span class="sc">$</span>integrated_data<span class="sc">$</span>DrugBank_RxCUI_Mapping <span class="sc">%&gt;%</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="fu">filter</span>(drugbank_id <span class="sc">==</span> target_drug_id_2)</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>target_rxcui_2 <span class="ot">&lt;-</span> mapping_df_2<span class="sc">$</span>rxcui[<span class="dv">1</span>]</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co"># Get Products &amp; Labels</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>product_rxcuis_2 <span class="ot">&lt;-</span> final_db<span class="sc">$</span>onsides<span class="sc">$</span>vocab_rxnorm_ingredient_to_product <span class="sc">%&gt;%</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>  <span class="fu">filter</span>(ingredient_id <span class="sc">==</span> target_rxcui_2) <span class="sc">%&gt;%</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>  <span class="fu">pull</span>(product_id)</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>target_label_ids_2 <span class="ot">&lt;-</span> final_db<span class="sc">$</span>onsides<span class="sc">$</span>product_to_rxnorm <span class="sc">%&gt;%</span></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>  <span class="fu">filter</span>(rxnorm_product_id <span class="sc">%in%</span> product_rxcuis_2) <span class="sc">%&gt;%</span></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>  <span class="fu">pull</span>(label_id)</span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co"># Summarize Events</span></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a>ae_summary_2 <span class="ot">&lt;-</span> final_db<span class="sc">$</span>onsides<span class="sc">$</span>product_adverse_effect <span class="sc">%&gt;%</span></span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a>  <span class="fu">filter</span>(product_label_id <span class="sc">%in%</span> target_label_ids_2) <span class="sc">%&gt;%</span></span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a>  <span class="fu">group_by</span>(effect_meddra_id) <span class="sc">%&gt;%</span></span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">Count =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(Count)) <span class="sc">%&gt;%</span></span>
+<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">10</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a>  <span class="fu">left_join</span>(final_db<span class="sc">$</span>onsides<span class="sc">$</span>vocab_meddra_adverse_effect, </span>
+<span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a>            <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;effect_meddra_id&quot;</span> <span class="ot">=</span> <span class="st">&quot;meddra_id&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a>  <span class="fu">select</span>(effect_meddra_id, meddra_name, Count) <span class="sc">%&gt;%</span></span>
+<span id="cb8-26"><a href="#cb8-26" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">meddra_name =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(meddra_name), <span class="fu">paste0</span>(<span class="st">&quot;MedDRA_&quot;</span>, effect_meddra_id), meddra_name)) <span class="sc">%&gt;%</span></span>
+<span id="cb8-27"><a href="#cb8-27" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Adverse_Event =</span> meddra_name)</span></code></pre></div>
+</div>
+<div id="polypharmacy-analysis-drug-drug-interactions" class="section level2">
+<h2>5. Polypharmacy Analysis: Drug-Drug Interactions</h2>
+<p><strong>New Insight:</strong> What happens when
+<strong>Leuprolide</strong> and <strong>Calcitriol</strong> are taken
+together?</p>
+<p>We query the <code>integrated_data$drug_drug_interactions</code>
+table, which was populated by <code>merge_drugbank_twosides</code>. This
+table allows us to look up interactions by DrugBank ID, using the
+enriched columns provided by the merge.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># Look for interactions where Drug 1 is Leuprolide AND Drug 2 is Calcitriol (or vice versa)</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>interaction_data <span class="ot">&lt;-</span> final_db<span class="sc">$</span>integrated_data<span class="sc">$</span>drug_drug_interactions <span class="sc">%&gt;%</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>    (drugbank_id_1 <span class="sc">==</span> target_drug_id <span class="sc">&amp;</span> drugbank_id_2 <span class="sc">==</span> target_drug_id_2) <span class="sc">|</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>    (drugbank_id_1 <span class="sc">==</span> target_drug_id_2 <span class="sc">&amp;</span> drugbank_id_2 <span class="sc">==</span> target_drug_id)</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="fu">as.numeric</span>(PRR))) <span class="sc">%&gt;%</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>  <span class="fu">select</span>(drug_name_1, drug_name_2, condition_concept_name, PRR, mean_reporting_frequency)</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="fu">print</span>(interaction_data)</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt;    drug_name_1 drug_name_2   condition_concept_name   PRR</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt;         &lt;char&gt;      &lt;char&gt;                   &lt;char&gt; &lt;num&gt;</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt; 1:  Leuprolide  Calcitriol Platelet count decreased    15</span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt; 2:  Leuprolide  Calcitriol Disturbance in attention     5</span></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co">#&gt; 3:  Leuprolide  Calcitriol              Haemorrhage     5</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt;    mean_reporting_frequency</span></span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt;                       &lt;num&gt;</span></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co">#&gt; 1:                0.0909091</span></span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="co">#&gt; 2:                0.0303030</span></span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a><span class="co">#&gt; 3:                0.0303030</span></span></code></pre></div>
+<div id="visualization-of-interaction-risks" class="section level3">
+<h3>5.1 Visualization of Interaction Risks</h3>
+<p>We can visualize the specific adverse events associated with this
+combination, ranked by their <strong>Proportional Reporting Ratio
+(PRR)</strong> (a measure of signal strength).</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="cf">if</span>(<span class="fu">nrow</span>(interaction_data) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  <span class="co"># Prepare data for canvasXpress</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  cx_int_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">PRR =</span> <span class="fu">as.numeric</span>(interaction_data<span class="sc">$</span>PRR))</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  <span class="fu">rownames</span>(cx_int_data) <span class="ot">&lt;-</span> interaction_data<span class="sc">$</span>condition_concept_name</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>  </span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>  <span class="fu">canvasXpress</span>(</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>    <span class="at">data =</span> <span class="fu">t</span>(cx_int_data),</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>    <span class="at">graphType =</span> <span class="st">&quot;Bar&quot;</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;Polypharmacy Risks: Leuprolide + Calcitriol&quot;</span>,</span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">&quot;Data from TWOSIDES&quot;</span>,</span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>    <span class="at">xAxisTitle =</span> <span class="st">&quot;Signal Strength (PRR)&quot;</span>,</span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>    <span class="at">yAxisTitle =</span> <span class="st">&quot;Adverse Event&quot;</span>,</span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>    <span class="at">showLegend =</span> <span class="cn">FALSE</span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a>  )</span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a>  <span class="fu">print</span>(<span class="st">&quot;No interaction data found for this specific pair in the sample dataset.&quot;</span>)</span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a>}</span></code></pre></div>
+<div id="htmlwidget-b4b89eb1f7e61dc2540f" style="width:600px;height:400px;" class="canvasXpress html-widget"></div>
+<script type="application/json" data-for="htmlwidget-b4b89eb1f7e61dc2540f">{"x":{"data":{"y":{"vars":["PRR"],"smps":["Platelet count decreased","Disturbance in attention","Haemorrhage"],"data":[[15,5,5]]},"x":null,"z":null},"config":{"graphType":"Bar","isR":true,"title":"Polypharmacy Risks: Leuprolide + Calcitriol","subtitle":"Data from TWOSIDES","xAxisTitle":"Signal Strength (PRR)","yAxisTitle":"Adverse Event","showLegend":false},"events":null,"afterRender":null},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<div id="comparative-overview" class="section level2">
+<h2>6. Comparative Overview</h2>
+<p>Finally, we can view the single-drug profiles alongside the
+interaction profile to see if new risks emerge.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># 1. Prepare Single Drug Data</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>s1 <span class="ot">&lt;-</span> ae_summary <span class="sc">%&gt;%</span> </span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Type =</span> <span class="st">&quot;Leuprolide (Alone)&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>  <span class="fu">select</span>(Adverse_Event, <span class="at">Value=</span>Count, Type)</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>s2 <span class="ot">&lt;-</span> ae_summary_2 <span class="sc">%&gt;%</span> </span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Type =</span> <span class="st">&quot;Calcitriol (Alone)&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>  <span class="fu">select</span>(Adverse_Event, <span class="at">Value=</span>Count, Type)</span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="co"># 2. Prepare Interaction Data (Show Top 5)</span></span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="co"># Note: Comparing Frequency (Count) vs PRR (Ratio) directly is tricky, </span></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="co"># so we visualize them to show relative importance within their own context.</span></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a>s3 <span class="ot">&lt;-</span> interaction_data <span class="sc">%&gt;%</span> </span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">5</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Type =</span> <span class="st">&quot;Interaction (PRR)&quot;</span>, <span class="at">Value =</span> <span class="fu">as.numeric</span>(PRR)) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a>  <span class="fu">select</span>(<span class="at">Adverse_Event =</span> condition_concept_name, Value, Type)</span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a></span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a><span class="co"># 3. Combine</span></span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a>combined_data <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(s1, s2, s3) <span class="sc">%&gt;%</span></span>
+<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a>  <span class="fu">group_by</span>(Type) <span class="sc">%&gt;%</span></span>
+<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a>  <span class="fu">slice_max</span>(Value, <span class="at">n =</span> <span class="dv">5</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb11-23"><a href="#cb11-23" tabindex="-1"></a></span>
+<span id="cb11-24"><a href="#cb11-24" tabindex="-1"></a><span class="co"># 4. Reshape for Matrix</span></span>
+<span id="cb11-25"><a href="#cb11-25" tabindex="-1"></a>comparison_matrix <span class="ot">&lt;-</span> combined_data <span class="sc">%&gt;%</span></span>
+<span id="cb11-26"><a href="#cb11-26" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> Type, <span class="at">values_from =</span> Value, <span class="at">values_fill =</span> <span class="dv">0</span>)</span>
+<span id="cb11-27"><a href="#cb11-27" tabindex="-1"></a></span>
+<span id="cb11-28"><a href="#cb11-28" tabindex="-1"></a>cx_compare <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(comparison_matrix[, <span class="sc">-</span><span class="dv">1</span>])</span>
+<span id="cb11-29"><a href="#cb11-29" tabindex="-1"></a><span class="fu">rownames</span>(cx_compare) <span class="ot">&lt;-</span> comparison_matrix<span class="sc">$</span>Adverse_Event</span>
+<span id="cb11-30"><a href="#cb11-30" tabindex="-1"></a></span>
+<span id="cb11-31"><a href="#cb11-31" tabindex="-1"></a><span class="co"># 5. Plot</span></span>
+<span id="cb11-32"><a href="#cb11-32" tabindex="-1"></a><span class="fu">canvasXpress</span>(</span>
+<span id="cb11-33"><a href="#cb11-33" tabindex="-1"></a>  <span class="at">data =</span> cx_compare,</span>
+<span id="cb11-34"><a href="#cb11-34" tabindex="-1"></a>  <span class="at">graphType =</span> <span class="st">&quot;Bar&quot;</span>,</span>
+<span id="cb11-35"><a href="#cb11-35" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">&quot;Safety Profile Comparison&quot;</span>,</span>
+<span id="cb11-36"><a href="#cb11-36" tabindex="-1"></a>  <span class="at">subtitle =</span> <span class="st">&quot;Single Drug Frequencies vs. Interaction PRR&quot;</span>,</span>
+<span id="cb11-37"><a href="#cb11-37" tabindex="-1"></a>  <span class="at">xAxisTitle =</span> <span class="st">&quot;Value&quot;</span>,</span>
+<span id="cb11-38"><a href="#cb11-38" tabindex="-1"></a>  <span class="at">yAxisTitle =</span> <span class="st">&quot;Adverse Event&quot;</span>,</span>
+<span id="cb11-39"><a href="#cb11-39" tabindex="-1"></a>  <span class="at">legendPosition =</span> <span class="st">&quot;right&quot;</span></span>
+<span id="cb11-40"><a href="#cb11-40" tabindex="-1"></a>)</span></code></pre></div>
+<div id="htmlwidget-d1acf00e8962faed3006" style="width:600px;height:400px;" class="canvasXpress html-widget"></div>
+<script type="application/json" data-for="htmlwidget-d1acf00e8962faed3006">{"x":{"data":{"y":{"vars":["MedDRA_10033336","MedDRA_10087193","MedDRA_10014139","UTI","MedDRA_10006573","MedDRA_10018642","Hypersensitivity","Hypersensitivity reaction","MedDRA_10040523","MedDRA_10040525","Platelet count decreased","Disturbance in attention","Haemorrhage","Pain","Nervous","Rash","Gas","Convulsion"],"smps":["Calcitriol (Alone)","Interaction (PRR)","Leuprolide (Alone)"],"data":[[670,0,0],[359,0,0],[233,0,0],[190,0,0],[169,0,0],[169,0,0],[169,0,0],[169,0,0],[169,0,0],[169,0,0],[0,15,0],[0,5,0],[0,5,0],[0,0,1.066e+04],[0,0,711],[0,0,526],[0,0,504],[0,0,424]]},"x":null,"z":null},"config":{"graphType":"Bar","isR":true,"title":"Safety Profile Comparison","subtitle":"Single Drug Frequencies vs. Interaction PRR","xAxisTitle":"Value","yAxisTitle":"Adverse Event","legendPosition":"right"},"events":null,"afterRender":null},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="conclusion" class="section level2">
+<h2>7. Conclusion</h2>
+<p>This analysis highlights the power of the <code>dbparser</code>
+integration ecosystem:</p>
+<ol style="list-style-type: decimal">
+<li><strong>DrugBank</strong> provided the identity and mechanism of
+Leuprolide and Calcitriol.</li>
+<li><strong>OnSIDES</strong> quantified their individual side effects
+(e.g., Pain, Hot Flushes).</li>
+<li><strong>TWOSIDES</strong> revealed specific risks when the drugs are
+combined (e.g., Anaemia).</li>
+</ol>
+<p>By chaining <code>merge_drugbank_onsides</code> and
+<code>merge_drugbank_twosides</code>, researchers can perform
+comprehensive safety assessments across mechanistic, real-world, and
+polypharmacy domains in just a few lines of R code.</p>
 </div>
 
 
